@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <stdint.h>
 
-#include <vasq/safe_snprintf.h>
+#include "vasq/safe_snprintf.h"
 
 static unsigned int
 numToBuffer(char *buffer, unsigned long long value);
@@ -11,20 +11,20 @@ static unsigned int
 numToBufferHex(char *buffer, unsigned long long value, bool capitalize);
 
 ssize_t
-safe_snprintf(char *buffer, size_t size, const char *format, ...)
+vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
 {
     ssize_t ret;
     va_list args;
 
     va_start(args,format);
-    ret = safe_vsnprintf(buffer,size,format,args);
+    ret = vasqSafeVsnprintf(buffer,size,format,args);
     va_end(args);
 
     return ret;
 }
 
 ssize_t
-safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
+vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
 {
     size_t so_far = 0;
 
@@ -44,7 +44,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
             }
 
             if ( c == '%' ) {
-                *(buffer++) = c;
+                *(buffer++) = '%';
                 so_far++;
                 size--;
                 continue;
@@ -90,7 +90,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
             }
 
             if ( c == 'c' ) {
-                *(buffer++) = va_arg(args, char);
+                *(buffer++) = va_arg(args, int);
                 if ( --size == 0 ) {
                     goto done;
                 }
@@ -126,7 +126,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 if ( is_long ) {
                     long value;
 
-                    value = va_args(args, long);
+                    value = va_arg(args, long);
                     if ( value < 0 ) {
                         *(buffer++) = '-';
                         if ( --size == 0 ) {
@@ -139,7 +139,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 else {
                     int value;
 
-                    value = va_args(args, int);
+                    value = va_arg(args, int);
                     if ( value < 0 ) {
                         *(buffer++) = '-';
                         if ( --size == 0 ) {
@@ -161,7 +161,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 if ( c == 'i' ) {
                     long long value;
 
-                    value = va_args(args, long long);
+                    value = va_arg(args, long long);
                     if ( value < 0 ) {
                         *(buffer++) = '-';
                         if ( --size == 0 ) {
@@ -174,7 +174,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 else if ( c== 'u' ) {
                     unsigned long long value;
 
-                    value = va_args(args, unsigned long long);
+                    value = va_arg(args, unsigned long long);
                     index -= numToBuffer(subbuffer+index-1, value);
                 }
                 else {
@@ -230,7 +230,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 }
 
                 if ( sizeof(void*) == sizeof(uint64_t) ) {
-                    uint64_t value
+                    uint64_t value;
 
                     value = va_arg(args, uint64_t);
                     index -= numToBufferHex(subbuffer+index-1, value, false);
@@ -284,7 +284,7 @@ safe_vsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 value = va_arg(args, unsigned int);
                 index -= numToBufferHex(subbuffer+index-1, value, capitalize);
 
-                while ( (sizeof(subbuffer)-index) < min_length && index > 0 ) {
+                while ( (sizeof(subbuffer)-index) < (unsigned int)min_length && index > 0 ) {
                     subbuffer[index--] = padding;
                 }
             }
@@ -344,15 +344,4 @@ numToBufferHex(char *buffer, unsigned long long value, bool capitalize)
     }
 
     return ret;
-}
-
-static char
-nibbleToHex(unsigned char nibble)
-{
-    if ( nibble < 10 ) {
-        return '0'+nibble;
-    }
-    else {
-        return 'a'+nibble-10;
-    }
 }

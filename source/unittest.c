@@ -1,7 +1,7 @@
 #include <unistd.h>
 
-#include <vasq/unittest.h>
-#include <vasq/logger.h>
+#include "vasq/unittest.h"
+#include "vasq/logger.h"
 
 int
 vasqTesterInit(vasqTester *tester, FILE *out)
@@ -18,7 +18,7 @@ vasqTesterInit(vasqTester *tester, FILE *out)
         return VASQ_RET_REDIRECT_FAIL;
     }
 
-    tester->out = fdopen(fd);
+    tester->out = fdopen(fd, "w");
     if ( !tester->out ) {
         VASQ_PERROR("fdopen", errno);
         close(fd);

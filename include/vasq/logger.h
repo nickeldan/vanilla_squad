@@ -18,7 +18,7 @@ typedef enum vasqLogLevel {
     VASQ_LL_DEBUG,
 } vasqLogLevel_t;
 
-#ifdef DEBUG
+#ifdef VASQ_ENABLE_LOGGING
 
 int
 vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name);
@@ -62,13 +62,13 @@ vasqRealloc(const char *file_name, const char *function_name, int line_no, void 
 #define VASQ_REALLOC(ptr,size) vasqRealloc(__FILE__,__PRETTY_FUNCTION__,__LINE__,ptr,size)
 
 pid_t
-vasqFork(const char *file_name, const char *function_name, int line_no)
+vasqFork(const char *file_name, const char *function_name, int line_no);
 #define VASQ_FORK() vasqFork(__FILE__,__PRETTY_FUNCTION__,__LINE__)
 
 const char*
 vasqLogLevelName(vasqLogLevel_t level) __attribute__ ((pure));
 
-#else // DEBUG
+#else // VASQ_ENABLE_LOGGING
 
 #define VASQ_LOG_INIT(level,out,include_file_name) VASQ_RET_OK
 #define VASQ_SET_LOG_LEVEL(level) NO_OP
@@ -84,7 +84,7 @@ vasqLogLevelName(vasqLogLevel_t level) __attribute__ ((pure));
 #define VASQ_REALLOC(ptr,size) realloc(ptr,size)
 #define VASQ_FORK() fork()
 
-#endif // DEBUG
+#endif // VASQ_ENABLE_LOGGING
 
 #define VASQ_PCRITICAL(function_name, errnum) VASQ_CRITICAL("%s: %s", function_name, strerror(errnum))
 #define VASQ_PERROR(function_name, errnum) VASQ_ERROR("%s: %s", function_name, strerror(errnum))

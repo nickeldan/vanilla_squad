@@ -23,7 +23,10 @@ static bool include_file_name_in_log;
 static pid_t my_pid;
 
 static void
-log_shutdown(void);
+logShutdown(void);
+
+static unsigned int
+logLevelNamePadding(vasqLogLevel_t level) __attribute__ ((pure));
 
 int
 vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
@@ -36,7 +39,7 @@ vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
         perror("dup");
         return VASQ_RET_REDIRECT_FAIL;
     }
-    atexit(log_shutdown);
+    atexit(logShutdown);
 
     include_file_name_in_log = include_file_name;
     my_pid = getpid();
@@ -52,14 +55,14 @@ vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, v
     max_log_level = level;
 
     vasqLogStatement(VASQ_LL_ALWAYS, file_name, function_name, line_no, "Log level set to %s",
-                     vasqLogLevelName(level));
+        vasqLogLevelName(level));
 }
 
 void
 vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, int line_no,
                  const char *format, ...)
 {
-    char output[1024];
+    char output[1024], padding[8];
     va_list args;
     ssize_t so_far, temp;
 
@@ -67,22 +70,23 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
         return;
     }
 
-    so_far = vasqSafeSnprintf(output, sizeof(output)-1, "(%i) (%i) [%s] ", my_pid, time(NULL),
-        vasqLogLevelName(level));
+    memset(padding,' ',sizeof(padding));
+    padding[logLevelNamePadding(level)] = '\0';
+
+    so_far = vasqSafeSnprintf(output, sizeof(output)-1, "(%i) (%i) [%s]%s ", my_pid, (int)time(NULL),
+        vasqLogLevelName(level), padding);
     if ( include_file_name_in_log ) {
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-(size_t)so_far, "%s:", file_name);
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-so_far, "%s:", file_name);
     }
-    so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-(size_t)so_far, "%s:%i ", function_name,
-        line_no);
+    so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-so_far, "%s:%i ", function_name, line_no);
 
     va_start(args, format);
-    temp = vasqSafeVsnprintf(output+so_far, sizeof(output)-1-(size_t)so_far, format, args);
+    temp = vasqSafeVsnprintf(output+so_far, sizeof(output)-1-so_far, format, args);
     va_end(args);
     if ( temp >= 0 ) {
         so_far += temp;
     }
     output[so_far++] = '\n';
-    output[so_far] = '\0';
 
     if ( write(log_fd,output,so_far) < 0 ) {
         NO_OP;
@@ -152,7 +156,7 @@ vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t
     ptr = malloc(size);
     if ( !ptr && size > 0 ) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to allocate %zu bytes",
-                         size);
+            size);
     }
     return ptr;
 }
@@ -165,7 +169,7 @@ vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t
     ptr = calloc(nmemb,size);
     if ( !ptr && nmemb*size > 0 ) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to allocate %zu bytes",
-                         nmemb*size);
+            nmemb*size);
     }
     return ptr;
 }
@@ -178,7 +182,7 @@ vasqRealloc(const char *file_name, const char *function_name, int line_no, void 
     success = realloc(ptr,size);
     if ( !success && size > 0 ) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to reallocate %zu bytes",
-                         size);
+            size);
     }
     return success;
 }
@@ -221,7 +225,21 @@ vasqLogLevelName(vasqLogLevel_t level)
 }
 
 static void
-log_shutdown(void)
+logShutdown(void)
 {
     close(log_fd);
+}
+
+static unsigned int
+logLevelNamePadding(vasqLogLevel_t level)
+{
+    switch ( level ) {
+    case VASQ_LL_ALWAYS: return 2;
+    case VASQ_LL_CRITICAL: return 0;
+    case VASQ_LL_ERROR: return 3;
+    case VASQ_LL_WARNING: return 1;
+    case VASQ_LL_INFO: return 4;
+    case VASQ_LL_DEBUG: return 3;
+    default: return 1;
+    }
 }

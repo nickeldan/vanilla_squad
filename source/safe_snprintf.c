@@ -26,7 +26,7 @@ vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
 ssize_t
 vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
 {
-    size_t so_far = 0;
+    char *start = buffer;
 
     size--;
     for (; *format && size>0; format++) {
@@ -45,7 +45,6 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
 
             if ( c == '%' ) {
                 *(buffer++) = '%';
-                so_far++;
                 size--;
                 continue;
             }
@@ -301,7 +300,6 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
         }
         else {
             *(buffer++) = c;
-            so_far++;
             size--;
         }
     }
@@ -309,7 +307,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
 done:
 
     *buffer = '\0';
-    return (ssize_t)so_far;
+    return buffer - start;
 }
 
 static unsigned int

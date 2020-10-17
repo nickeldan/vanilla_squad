@@ -1,14 +1,19 @@
 #include <string.h>
+#include <ctype.h>
 #include <time.h>
 
 #define VASQ_ENABLE_LOGGING
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 
-#define MAX_HEXDUMP_SIZE 1024
-#define HEXDUMP_WIDTH 32
+#define MAX_HEXDUMP_SIZE 512
+#define HEXDUMP_WIDTH 16
 #if MAX_HEXDUMP_SIZE%HEXDUMP_WIDTH != 0
 #error "MAX_HEXDUMP_SIZE must be a multiple of HEXDUMP_WIDTH."
+#endif
+
+#ifndef VASQ_NEW_CHILD_LOG_LEVEL
+#define VASQ_NEW_CHILD_LOG_LEVEL VASQ_LL_ALWAYS
 #endif
 
 // Global variables
@@ -88,10 +93,54 @@ void
 vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
             const unsigned char *data, size_t size)
 {
+    size_t actual_dump_size;
+    ssize_t so_far = 0;
     char output[4096];
 
     if ( max_log_level < VASQ_LL_DEBUG || log_fd == -1 ) {
         return;
+    }
+
+    vasqLogStatement(VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
+        (size == 1)? "" : "s");
+
+
+    actual_dump_size = MIN(size,MAX_HEXDUMP_SIZE);
+    for (size_t k=0; k<actual_dump_size; k++) {
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", data[k]);
+        if ( k%HEXDUMP_WIDTH == HEXDUMP_WIDTH-1 ) {
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
+
+            for (size_t j=k+1-HEXDUMP_WIDTH; j<=k; j++) {
+                char c;
+
+                c = data[j];
+                so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
+            }
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
+        }
+    }
+
+    if ( actual_dump_size%HEXDUMP_WIDTH != 0 ) {
+        for (size_t k=0; k<HEXDUMP_WIDTH-actual_dump_size%HEXDUMP_WIDTH; k++) {
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "   ");
+        }
+
+        for (size_t k=actual_dump_size-actual_dump_size%HEXDUMP_WIDTH; k<actual_dump_size; k++) {
+            char c;
+
+            c = data[k];
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
+        }
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
+    }
+    else if ( size > actual_dump_size ) {
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "... (%zu more byte%s)\n",
+            size-actual_dump_size, (size-actual_dump_size == 1)? "" : "s");
+    }
+
+    if ( write(log_fd,output,so_far) < 0 ) {
+        NO_OP;
     }
 }
 
@@ -149,8 +198,8 @@ vasqFork(const char *file_name, const char *function_name, int line_no)
         break;
 
     default:
-        vasqLogStatement(VASQ_LL_ALWAYS, file_name, function_name, line_no, "Child process started (PID = "
-                         "%i)", child);
+        vasqLogStatement(VASQ_NEW_CHILD_LOG_LEVEL, file_name, function_name, line_no,
+            "Child process started (PID = %i)", child);
         break;
     }
 

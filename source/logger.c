@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include <vasq/logger.h>
+#include <vasq/safe_snprintf.h>
 
 // Global variables
 static logLevel_t max_log_level;
@@ -48,11 +49,31 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
                  const char *format, ...)
 {
     char output[1024];
-    time_t now;
+    va_list args;
+    ssize_t so_far, temp;
 
     if ( level > max_log_level || log_fd == -1 ) {
         return;
     }
+
+    so_far = safe_snprintf(output, sizeof(output)-1, "(%i) (%i) [%s] ", my_pid, time(NULL),
+        vasqLogLevelName(level));
+    if ( include_file_name_in_log ) {
+        so_far += safe_snprintf(output+so_far, sizeof(output)-1-(size_t)so_far, "%s:", file_name);
+    }
+    so_far += safe_snprintf(output+so_far, sizeof(output)-1-(size_t)so_far, "%s:%i ", function_name,
+        line_no);
+
+    va_start(args, format);
+    temp = safe_vsnprintf(output+so_far, sizeof(output)-1-(size_t)so_far, format, args);
+    va_end(args);
+    if ( temp >= 0 ) {
+        so_far += temp;
+    }
+    output[so_far++] = '\n';
+    output[so_far] = '\0';
+
+    (void)write(log_fd,output,so_far);
 }
 
 void

@@ -153,10 +153,6 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 // is_long must be true.
 
                 c = *(++format);
-                if ( c == '\0' ) {
-                    return -1;
-                }
-
                 if ( c == 'i' ) {
                     long long value;
 
@@ -186,10 +182,6 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 }
 
                 c = *(++format);
-                if ( c == '\0' ) {
-                    return -1;
-                }
-
                 if ( c == 'u' ) {
                     size_t value;
 

@@ -2,7 +2,9 @@
 #include <ctype.h>
 #include <time.h>
 
+#ifndef VASQ_ENABLE_LOGGING
 #define VASQ_ENABLE_LOGGING
+#endif
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 

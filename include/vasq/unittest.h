@@ -8,16 +8,12 @@
 #include "logger.h"
 
 typedef struct vasqTester {
-    FILE *out;
     unsigned int num_errors;
     bool success;
 } vasqTester;
 
-int
-vasqTesterInit(vasqTester *tester, FILE *out);
-
 void
-vasqTesterDestroy(vasqTester *tester);
+vasqTesterInit(vasqTester *tester);
 
 #ifndef VASQ_TESTER_NAME
 #define VASQ_TESTER_NAME tester

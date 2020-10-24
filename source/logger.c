@@ -72,7 +72,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
         return;
     }
 
-    memset(padding,' ',sizeof(padding));
+    memset(padding, ' ', sizeof(padding));
     padding[logLevelNamePadding(level)] = '\0';
 
     so_far = vasqSafeSnprintf(output, sizeof(output)-1, "(%i) (%i) [%s]%s ", my_pid, (int)time(NULL),
@@ -90,7 +90,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     }
     output[so_far++] = '\n';
 
-    if ( write(log_fd,output,so_far) < 0 ) {
+    if ( write(log_fd, output, so_far) < 0 ) {
         NO_OP;
     }
 }
@@ -145,7 +145,7 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
             size-actual_dump_size, (size-actual_dump_size == 1)? "" : "s");
     }
 
-    if ( write(log_fd,output,so_far) < 0 ) {
+    if ( write(log_fd, output, so_far) < 0 ) {
         NO_OP;
     }
 }

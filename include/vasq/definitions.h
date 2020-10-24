@@ -2,6 +2,7 @@
 #define __VANILLA_SQUAD_DEFINITIONS_H__
 
 #include <stdbool.h>
+#include <errno.h>
 #include <sys/types.h>
 
 #define NO_OP (void)0

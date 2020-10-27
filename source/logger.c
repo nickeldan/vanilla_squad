@@ -2,9 +2,7 @@
 #include <ctype.h>
 #include <time.h>
 
-#ifndef VASQ_ENABLE_LOGGING
 #define VASQ_ENABLE_LOGGING
-#endif
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 
@@ -97,10 +95,11 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
 
 void
 vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
-            const unsigned char *data, size_t size)
+            const void *data, size_t size)
 {
     size_t actual_dump_size;
     ssize_t so_far = 0;
+    const unsigned char *bytes;
     char output[4096];
 
     if ( max_log_level < VASQ_LL_DEBUG || log_fd == -1 ) {
@@ -110,17 +109,20 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
     vasqLogStatement(VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
         (size == 1)? "" : "s");
 
-
+    bytes = (const unsigned char*)data;
     actual_dump_size = MIN(size,MAX_HEXDUMP_SIZE);
     for (size_t k=0; k<actual_dump_size; k++) {
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", data[k]);
+        if ( k%HEXDUMP_WIDTH == 0 ) {
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
+        }
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", bytes[k]);
         if ( k%HEXDUMP_WIDTH == HEXDUMP_WIDTH-1 ) {
             so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
 
             for (size_t j=k+1-HEXDUMP_WIDTH; j<=k; j++) {
                 char c;
 
-                c = data[j];
+                c = bytes[j];
                 so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
             }
             so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
@@ -131,17 +133,18 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
         for (size_t k=0; k<HEXDUMP_WIDTH-actual_dump_size%HEXDUMP_WIDTH; k++) {
             so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "   ");
         }
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
 
         for (size_t k=actual_dump_size-actual_dump_size%HEXDUMP_WIDTH; k<actual_dump_size; k++) {
             char c;
 
-            c = data[k];
+            c = bytes[k];
             so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
         }
         so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
     }
     else if ( size > actual_dump_size ) {
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "... (%zu more byte%s)\n",
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t... (%zu more byte%s)\n",
             size-actual_dump_size, (size-actual_dump_size == 1)? "" : "s");
     }
 

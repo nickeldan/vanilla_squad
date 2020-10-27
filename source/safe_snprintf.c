@@ -267,8 +267,12 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     value = va_arg(args, unsigned int);
                     index -= numToBufferHex(subbuffer+index-1, value, capitalize);
 
+                    if ( index == sizeof(subbuffer) ) {
+                        subbuffer[--index] = '0';
+                    }
+
                     while ( (sizeof(subbuffer)-index) < (unsigned int)min_length && index > 0 ) {
-                        subbuffer[index--] = padding;
+                        subbuffer[--index] = padding;
                     }
                 }
                 else {

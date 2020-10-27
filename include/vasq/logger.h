@@ -46,7 +46,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
 
 void
 vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
-            const unsigned char *data, size_t size);
+            const void *data, size_t size);
 #define VASQ_HEXDUMP(name,data,size) vasqHexDump(__FILE__,__func__,__LINE__,name,data,size)
 
 void*

@@ -1,5 +1,4 @@
 #include "vasq/unittest.h"
-#include "vasq/logger.h"
 
 void
 vasqTesterInit(vasqTester *tester)

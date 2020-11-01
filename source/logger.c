@@ -109,7 +109,7 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
     vasqLogStatement(VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
         (size == 1)? "" : "s");
 
-    bytes = (const unsigned char*)data;
+    bytes = data;
     actual_dump_size = MIN(size,MAX_HEXDUMP_SIZE);
     for (size_t k=0; k<actual_dump_size; k++) {
         if ( k%HEXDUMP_WIDTH == 0 ) {

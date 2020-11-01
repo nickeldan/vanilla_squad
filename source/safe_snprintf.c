@@ -88,15 +88,13 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
             }
             else {
                 bool is_long;
-                char subbuffer[20]; // Big enough to hold a 64-bit unsigned integer without the null terminator.
+                char subbuffer[20]; // Big enough to hold a 64-bit unsigned integer without the null
+                                    // terminator.
                 unsigned int index = sizeof(subbuffer);
 
                 if ( c == 'l' ) {
                     is_long = true;
                     c = *(++format);
-                    if ( c == '\0' ) {
-                        return -1;
-                    }
                 }
                 else {
                     is_long = false;
@@ -124,7 +122,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         if ( value < 0 ) {
                             *(buffer++) = '-';
                             if ( --size == 0 ) {
-                                break;
+                                goto done;
                             }
                             value *= -1;
                         }
@@ -137,7 +135,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         if ( value < 0 ) {
                             *(buffer++) = '-';
                             if ( --size == 0 ) {
-                                break;
+                                goto done;
                             }
                             value *= -1;
                         }
@@ -302,11 +300,10 @@ done:
 static unsigned int
 numToBuffer(char *buffer, unsigned long long value)
 {
-    unsigned int ret = 0;
+    unsigned int ret;
 
-    while ( value > 0 ) {
+    for (ret=0; value>0; ret++) {
         *(buffer--) = '0' + value%10;
-        ret++;
         value /= 10;
     }
 
@@ -316,17 +313,16 @@ numToBuffer(char *buffer, unsigned long long value)
 static unsigned int
 numToBufferHex(char *buffer, unsigned long long value, bool capitalize)
 {
-    unsigned int ret = 0;
+    unsigned int ret;
     char hex_letter;
 
     hex_letter = capitalize? 'A' : 'a';
 
-    while ( value > 0 ) {
+    for (ret=0; value>0; ret++) {
         int nibble;
 
         nibble = value&0x0f;
-        *(buffer--) = ( nibble < 10 )? ( '0'+nibble ) :  (hex_letter+nibble-10 );
-        ret++;
+        *(buffer--) = ( nibble < 10 )? ( '0'+nibble ) :  ( hex_letter+nibble-10 );
         value = ( value >> 4 );
     }
 

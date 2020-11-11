@@ -1,18 +1,18 @@
 #ifndef __VANILLA_SQUAD_DEFINITIONS_H__
 #define __VANILLA_SQUAD_DEFINITIONS_H__
 
-#include <stdbool.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <sys/types.h>
 
 #define NO_OP (void)0
 
 #ifndef MIN
-#define MIN(a,b) ( ( (a) < (b) )? (a) : (b) )
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#define MAX(a,b) ( ( (a) > (b) )? (a) : (b) )
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 enum vasqRetValue {
@@ -25,4 +25,4 @@ enum vasqRetValue {
     VASQ_RET_UNUSED,
 };
 
-#endif // __VANILLA_SQUAD_DEFINITIONS_H__
+#endif  // __VANILLA_SQUAD_DEFINITIONS_H__

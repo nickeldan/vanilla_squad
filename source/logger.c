@@ -1,5 +1,5 @@
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 #include <time.h>
 
 #define VASQ_ENABLE_LOGGING
@@ -7,8 +7,8 @@
 #include "vasq/safe_snprintf.h"
 
 #define MAX_HEXDUMP_SIZE 512
-#define HEXDUMP_WIDTH 16
-#if MAX_HEXDUMP_SIZE%HEXDUMP_WIDTH != 0
+#define HEXDUMP_WIDTH    16
+#if MAX_HEXDUMP_SIZE % HEXDUMP_WIDTH != 0
 #error "MAX_HEXDUMP_SIZE must be a multiple of HEXDUMP_WIDTH."
 #endif
 
@@ -26,19 +26,19 @@ static void
 logShutdown(void);
 
 static unsigned int
-logLevelNamePadding(vasqLogLevel_t level) __attribute__ ((pure));
+logLevelNamePadding(vasqLogLevel_t level) __attribute__((pure));
 
 static bool
-safe_isprint(char c) __attribute__ ((pure));
+safe_isprint(char c) __attribute__((pure));
 
 int
-vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
-    if ( !out ) {
+vasqLogInit(vasqLogLevel_t level, FILE* out, bool include_file_name) {
+    if (!out) {
         return VASQ_RET_IMPROPER_USE;
     }
 
     log_fd = dup(fileno(out));
-    if ( log_fd < 0 ) {
+    if (log_fd < 0) {
         perror("dup");
         return VASQ_RET_REDIRECT_FAIL;
     }
@@ -53,155 +53,148 @@ vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
 }
 
 void
-vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level)
-{
+vasqSetLogLevel(const char* file_name, const char* function_name, int line_no, vasqLogLevel_t level) {
     max_log_level = level;
 
     vasqLogStatement(VASQ_LL_ALWAYS, file_name, function_name, line_no, "Log level set to %s",
-        vasqLogLevelName(level));
+                     vasqLogLevelName(level));
 }
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, int line_no,
-                 const char *format, ...)
-{
+vasqLogStatement(vasqLogLevel_t level, const char* file_name, const char* function_name, int line_no,
+                 const char* format, ...) {
     char output[1024], padding[8];
     va_list args;
     ssize_t so_far, temp;
 
-    if ( level > max_log_level || log_fd == -1 ) {
+    if (level > max_log_level || log_fd == -1) {
         return;
     }
 
     memset(padding, ' ', sizeof(padding));
     padding[logLevelNamePadding(level)] = '\0';
 
-    so_far = vasqSafeSnprintf(output, sizeof(output)-1, "(%i) (%i) [%s]%s ", my_pid, (int)time(NULL),
-        vasqLogLevelName(level), padding);
-    if ( include_file_name_in_log ) {
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-so_far, "%s:", file_name);
+    so_far = vasqSafeSnprintf(output, sizeof(output) - 1, "(%i) (%i) [%s]%s ", my_pid, (int)time(NULL),
+                              vasqLogLevelName(level), padding);
+    if (include_file_name_in_log) {
+        so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - 1 - so_far, "%s:", file_name);
     }
-    so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-1-so_far, "%s:%i ", function_name, line_no);
+    so_far +=
+        vasqSafeSnprintf(output + so_far, sizeof(output) - 1 - so_far, "%s:%i ", function_name, line_no);
 
     va_start(args, format);
-    temp = vasqSafeVsnprintf(output+so_far, sizeof(output)-1-so_far, format, args);
+    temp = vasqSafeVsnprintf(output + so_far, sizeof(output) - 1 - so_far, format, args);
     va_end(args);
-    if ( temp >= 0 ) {
+    if (temp >= 0) {
         so_far += temp;
     }
     output[so_far++] = '\n';
 
-    if ( write(log_fd, output, so_far) < 0 ) {
+    if (write(log_fd, output, so_far) < 0) {
         NO_OP;
     }
 }
 
 void
-vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
-            const void *data, size_t size)
-{
+vasqHexDump(const char* file_name, const char* function_name, int line_no, const char* name,
+            const void* data, size_t size) {
     size_t actual_dump_size;
     ssize_t so_far = 0;
-    const unsigned char *bytes;
+    const unsigned char* bytes;
     char output[4096];
 
-    if ( max_log_level < VASQ_LL_DEBUG || log_fd == -1 ) {
+    if (max_log_level < VASQ_LL_DEBUG || log_fd == -1) {
         return;
     }
 
     vasqLogStatement(VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
-        (size == 1)? "" : "s");
+                     (size == 1) ? "" : "s");
 
     bytes = data;
-    actual_dump_size = MIN(size,MAX_HEXDUMP_SIZE);
-    for (size_t k=0; k<actual_dump_size; k+=HEXDUMP_WIDTH) {
+    actual_dump_size = MIN(size, MAX_HEXDUMP_SIZE);
+    for (size_t k = 0; k < actual_dump_size; k += HEXDUMP_WIDTH) {
         unsigned int line_length;
 
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
+        so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "\t");
 
-        line_length = MIN(actual_dump_size-k, HEXDUMP_WIDTH);
-        for (unsigned int j=0; j<line_length; j++) {
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", bytes[k+j]);
+        line_length = MIN(actual_dump_size - k, HEXDUMP_WIDTH);
+        for (unsigned int j = 0; j < line_length; j++) {
+            so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "%02x ", bytes[k + j]);
         }
-        
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "    ");
 
-        for (unsigned int j=0; j<line_length; j++) {
+        so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "    ");
+
+        for (unsigned int j = 0; j < line_length; j++) {
             char c;
 
-            c = bytes[k+j];
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", safe_isprint(c)? c : '.');
+            c = bytes[k + j];
+            so_far +=
+                vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "%c", safe_isprint(c) ? c : '.');
         }
 
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
+        so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "\n");
     }
 
-    if ( size > actual_dump_size ) {
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t... (%zu more byte%s)\n",
-            size-actual_dump_size, (size-actual_dump_size == 1)? "" : "s");
+    if (size > actual_dump_size) {
+        so_far += vasqSafeSnprintf(output + so_far, sizeof(output) - so_far, "\t... (%zu more byte%s)\n",
+                                   size - actual_dump_size, (size - actual_dump_size == 1) ? "" : "s");
     }
 
-    if ( write(log_fd, output, so_far) < 0 ) {
+    if (write(log_fd, output, so_far) < 0) {
         NO_OP;
     }
 }
 
 void*
-vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t size)
-{
-    void *ptr;
+vasqMalloc(const char* file_name, const char* function_name, int line_no, size_t size) {
+    void* ptr;
 
     ptr = malloc(size);
-    if ( !ptr && size > 0 ) {
+    if (!ptr && size > 0) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to allocate %zu bytes",
-            size);
+                         size);
     }
     return ptr;
 }
 
 void*
-vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t nmemb, size_t size)
-{
-    void *ptr;
+vasqCalloc(const char* file_name, const char* function_name, int line_no, size_t nmemb, size_t size) {
+    void* ptr;
 
-    ptr = calloc(nmemb,size);
-    if ( !ptr && nmemb*size > 0 ) {
+    ptr = calloc(nmemb, size);
+    if (!ptr && nmemb * size > 0) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to allocate %zu bytes",
-            nmemb*size);
+                         nmemb * size);
     }
     return ptr;
 }
 
 void*
-vasqRealloc(const char *file_name, const char *function_name, int line_no, void *ptr, size_t size)
-{
-    void *success;
+vasqRealloc(const char* file_name, const char* function_name, int line_no, void* ptr, size_t size) {
+    void* success;
 
-    success = realloc(ptr,size);
-    if ( !success && size > 0 ) {
+    success = realloc(ptr, size);
+    if (!success && size > 0) {
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "Failed to reallocate %zu bytes",
-            size);
+                         size);
     }
     return success;
 }
 
 pid_t
-vasqFork(const char *file_name, const char *function_name, int line_no)
-{
+vasqFork(const char* file_name, const char* function_name, int line_no) {
     pid_t child;
 
-    switch ( (child=fork()) ) {
+    switch ((child = fork())) {
     case -1:
         vasqLogStatement(VASQ_LL_ERROR, file_name, function_name, line_no, "fork: %s", strerror(errno));
         break;
 
-    case 0:
-        my_pid = getpid();
-        break;
+    case 0: my_pid = getpid(); break;
 
     default:
         vasqLogStatement(VASQ_NEW_CHILD_LOG_LEVEL, file_name, function_name, line_no,
-            "Child process started (PID = %i)", child);
+                         "Child process started (PID = %i)", child);
         break;
     }
 
@@ -209,9 +202,8 @@ vasqFork(const char *file_name, const char *function_name, int line_no)
 }
 
 const char*
-vasqLogLevelName(vasqLogLevel_t level)
-{
-    switch ( level ) {
+vasqLogLevelName(vasqLogLevel_t level) {
+    switch (level) {
     case VASQ_LL_ALWAYS: return "ALWAYS";
     case VASQ_LL_CRITICAL: return "CRITICAL";
     case VASQ_LL_ERROR: return "ERROR";
@@ -223,15 +215,13 @@ vasqLogLevelName(vasqLogLevel_t level)
 }
 
 static void
-logShutdown(void)
-{
+logShutdown(void) {
     close(log_fd);
 }
 
 static unsigned int
-logLevelNamePadding(vasqLogLevel_t level)
-{
-    switch ( level ) {
+logLevelNamePadding(vasqLogLevel_t level) {
+    switch (level) {
     case VASQ_LL_ALWAYS: return 2;
     case VASQ_LL_CRITICAL: return 0;
     case VASQ_LL_ERROR: return 3;
@@ -243,7 +233,6 @@ logLevelNamePadding(vasqLogLevel_t level)
 }
 
 static bool
-safe_isprint(char c)
-{
+safe_isprint(char c) {
     return c >= ' ' && c <= '~';
 }

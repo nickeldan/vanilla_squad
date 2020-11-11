@@ -5,10 +5,10 @@
 #include "vasq/safe_snprintf.h"
 
 static unsigned int
-numToBuffer(char *buffer, unsigned long long value);
+numToBuffer(char *buffer, uintmax_t value);
 
 static unsigned int
-numToBufferHex(char *buffer, unsigned long long value, bool capitalize);
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize);
 
 ssize_t
 vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
@@ -88,7 +88,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
             }
             else {
                 bool is_long;
-                char subbuffer[20]; // Big enough to hold a 64-bit unsigned integer without the null
+                char subbuffer[39]; // Big enough to hold a 128-bit unsigned integer without the null
                                     // terminator.
                 unsigned int index = sizeof(subbuffer);
 
@@ -185,6 +185,35 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         ssize_t value;
 
                         value = va_arg(args, ssize_t);
+                        if ( value < 0 ) {
+                            *(buffer++) = '-';
+                            if ( --size == 0 ) {
+                                goto done;
+                            }
+                            value *= -1;
+                        }
+                        index -= numToBuffer(subbuffer+index-1, value);
+                    }
+                    else {
+                        return -1;
+                    }
+                }
+                else if ( c == 'j' ) {
+                    if ( is_long ) {
+                        return -1;
+                    }
+
+                    c = *(++format);
+                    if ( c == 'u' ) {
+                        uintmax_t value;
+
+                        value = va_arg(args, uintmax_t);
+                        index -= numToBuffer(subbuffer+index-1, value);
+                    }
+                    else if ( c == 'i' ) {
+                        intmax_t value;
+
+                        value = va_arg(args, intmax_t);
                         if ( value < 0 ) {
                             *(buffer++) = '-';
                             if ( --size == 0 ) {
@@ -298,7 +327,7 @@ done:
 }
 
 static unsigned int
-numToBuffer(char *buffer, unsigned long long value)
+numToBuffer(char *buffer, uintmax_t value)
 {
     unsigned int ret;
 
@@ -311,7 +340,7 @@ numToBuffer(char *buffer, unsigned long long value)
 }
 
 static unsigned int
-numToBufferHex(char *buffer, unsigned long long value, bool capitalize)
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
 {
     unsigned int ret;
     char hex_letter;

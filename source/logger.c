@@ -28,6 +28,9 @@ logShutdown(void);
 static unsigned int
 logLevelNamePadding(vasqLogLevel_t level) __attribute__ ((pure));
 
+static bool
+safe_isprint(char c) __attribute__ ((pure));
+
 int
 vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
     if ( !out ) {
@@ -111,39 +114,29 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
 
     bytes = data;
     actual_dump_size = MIN(size,MAX_HEXDUMP_SIZE);
-    for (size_t k=0; k<actual_dump_size; k++) {
-        if ( k%HEXDUMP_WIDTH == 0 ) {
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
-        }
-        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", bytes[k]);
-        if ( k%HEXDUMP_WIDTH == HEXDUMP_WIDTH-1 ) {
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
+    for (size_t k=0; k<actual_dump_size; k+=HEXDUMP_WIDTH) {
+        unsigned int line_length;
 
-            for (size_t j=k+1-HEXDUMP_WIDTH; j<=k; j++) {
-                char c;
-
-                c = bytes[j];
-                so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
-            }
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
-        }
-    }
-
-    if ( actual_dump_size%HEXDUMP_WIDTH != 0 ) {
-        for (size_t k=0; k<HEXDUMP_WIDTH-actual_dump_size%HEXDUMP_WIDTH; k++) {
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "   ");
-        }
         so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t");
 
-        for (size_t k=actual_dump_size-actual_dump_size%HEXDUMP_WIDTH; k<actual_dump_size; k++) {
+        line_length = MIN(actual_dump_size-k, HEXDUMP_WIDTH);
+        for (unsigned int j=0; j<line_length; j++) {
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%02x ", bytes[k+j]);
+        }
+        
+        so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "    ");
+
+        for (unsigned int j=0; j<line_length; j++) {
             char c;
 
-            c = bytes[k];
-            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", isprint(c)? c : '.');
+            c = bytes[k+j];
+            so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "%c", safe_isprint(c)? c : '.');
         }
+
         so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\n");
     }
-    else if ( size > actual_dump_size ) {
+
+    if ( size > actual_dump_size ) {
         so_far += vasqSafeSnprintf(output+so_far, sizeof(output)-so_far, "\t... (%zu more byte%s)\n",
             size-actual_dump_size, (size-actual_dump_size == 1)? "" : "s");
     }
@@ -247,4 +240,10 @@ logLevelNamePadding(vasqLogLevel_t level)
     case VASQ_LL_DEBUG: return 3;
     default: return 1;
     }
+}
+
+static bool
+safe_isprint(char c)
+{
+    return c >= ' ' && c <= '~';
 }

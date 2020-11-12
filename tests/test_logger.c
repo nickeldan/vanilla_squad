@@ -9,12 +9,12 @@ int main() {
         return ret;
     }
 
-    VASQ_ALWAYS("This is an ALWAYS message.");
-    VASQ_CRITICAL("This is a CRITICAL message.");
-    VASQ_ERROR("This is an ERROR message.");
-    VASQ_WARNING("This is a WARNING message.");
-    VASQ_INFO("This is an INFO message.");
-    VASQ_DEBUG("This is a DEBUG message.");
+    VASQ_ALWAYS("This is an ALWAYS message");
+    VASQ_CRITICAL("This is a CRITICAL message");
+    VASQ_ERROR("This is an ERROR message");
+    VASQ_WARNING("This is a WARNING message");
+    VASQ_INFO("This is an INFO message");
+    VASQ_DEBUG("This is a DEBUG message");
 
     VASQ_HEXDUMP("Lorem ipsum", data, sizeof(data));
 

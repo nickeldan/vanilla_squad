@@ -13,14 +13,14 @@ typedef struct vasqTester {
 } vasqTester;
 
 void
-vasqTesterInit(vasqTester* tester);
+vasqTesterInit(vasqTester *tester);
 
 #ifndef VASQ_TESTER_NAME
 #define VASQ_TESTER_NAME tester
 #endif
 
-#define VASQ_TEST_FUNCTION(func_name)          void func_name(vasqTester* VASQ_TESTER_NAME)
-#define VASQ_SUB_TEST_FUNCTION(func_name, ...) void func_name(vasqTester* VASQ_TESTER_NAME, ##__VA_ARGS__)
+#define VASQ_TEST_FUNCTION(func_name)          void func_name(vasqTester *VASQ_TESTER_NAME)
+#define VASQ_SUB_TEST_FUNCTION(func_name, ...) void func_name(vasqTester *VASQ_TESTER_NAME, ##__VA_ARGS__)
 
 #define VASQ_RUN_TEST(tester, func) \
     do {                            \

@@ -5,13 +5,13 @@
 #include "vasq/safe_snprintf.h"
 
 static unsigned int
-numToBuffer(char* buffer, uintmax_t value);
+numToBuffer(char *buffer, uintmax_t value);
 
 static unsigned int
-numToBufferHex(char* buffer, uintmax_t value, bool capitalize);
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize);
 
 ssize_t
-vasqSafeSnprintf(char* buffer, size_t size, const char* format, ...) {
+vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...) {
     ssize_t ret;
     va_list args;
 
@@ -23,8 +23,8 @@ vasqSafeSnprintf(char* buffer, size_t size, const char* format, ...) {
 }
 
 ssize_t
-vasqSafeVsnprintf(char* buffer, size_t size, const char* format, va_list args) {
-    char* start = buffer;
+vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
+    char *start = buffer;
 
     if (!buffer || size == 0 || !format) {
         return -1;
@@ -42,7 +42,7 @@ vasqSafeVsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                 *(buffer++) = '%';
                 size--;
             } else if (c == 's') {
-                for (const char* string = va_arg(args, const char*); *string; string++) {
+                for (const char *string = va_arg(args, const char *); *string; string++) {
                     *(buffer++) = *string;
                     if (--size == 0) {
                         goto done;
@@ -50,7 +50,7 @@ vasqSafeVsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                 }
             } else if (c == '.') {
                 unsigned int length;
-                const char* string;
+                const char *string;
 
                 if (*(++format) != '*') {
                     return -1;
@@ -61,7 +61,7 @@ vasqSafeVsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                 }
 
                 length = va_arg(args, unsigned int);
-                string = va_arg(args, const char*);
+                string = va_arg(args, const char *);
 
                 for (unsigned int k = 0; k < length; k++) {
                     c = *(string++);
@@ -221,7 +221,7 @@ vasqSafeVsnprintf(char* buffer, size_t size, const char* format, va_list args) {
                         goto done;
                     }
 
-                    if (sizeof(void*) == sizeof(uint64_t)) {
+                    if (sizeof(void *) == sizeof(uint64_t)) {
                         uint64_t value;
 
                         value = va_arg(args, uint64_t);
@@ -299,7 +299,7 @@ done:
 }
 
 static unsigned int
-numToBuffer(char* buffer, uintmax_t value) {
+numToBuffer(char *buffer, uintmax_t value) {
     unsigned int ret;
 
     for (ret = 0; value > 0; ret++) {
@@ -311,7 +311,7 @@ numToBuffer(char* buffer, uintmax_t value) {
 }
 
 static unsigned int
-numToBufferHex(char* buffer, uintmax_t value, bool capitalize) {
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize) {
     unsigned int ret;
     char hex_letter;
 

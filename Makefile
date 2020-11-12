@@ -12,9 +12,9 @@ LIBNAME := vanillasquad
 OBJECT_FILES := source/logger.o source/safe_snprintf.o source/unittest.o
 TESTS := logger_test
 
-.PHONY: all clean tests
+.PHONY: all clean
 
-all: lib$(LIBNAME).so lib$(LIBNAME).a tests
+all: lib$(LIBNAME).so lib$(LIBNAME).a $(TESTS)
 
 lib$(LIBNAME).so: $(OBJECT_FILES)
 	$(CC) -shared -o $@ $^
@@ -24,8 +24,6 @@ lib$(LIBNAME).a: $(OBJECT_FILES)
 
 source/%.o: source/%.c include/vasq/*.h
 	cd source && $(CC) $(COMPILER_FLAGS) -I../include -c $(notdir $<)
-
-tests: $(TESTS) 
 
 %_test: tests/test_%.o lib$(LIBNAME).a
 	$(CC) -o $@ $^

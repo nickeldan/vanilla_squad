@@ -21,16 +21,16 @@ typedef enum vasqLogLevel {
 #ifdef VASQ_ENABLE_LOGGING
 
 int
-vasqLogInit(vasqLogLevel_t level, FILE* out, bool include_file_name);
+vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name);
 #define VASQ_LOG_INIT(level, out, include_file_name) vasqLogInit(level, out, include_file_name)
 
 void
-vasqSetLogLevel(const char* file_name, const char* function_name, int line_no, vasqLogLevel_t level);
+vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level);
 #define VASQ_SET_LOG_LEVEL(level) vasqSetLogLevel(__FILE__, __func__, __LINE__, level)
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char* file_name, const char* function_name, int line_no,
-                 const char* format, ...);
+vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, int line_no,
+                 const char *format, ...);
 #define VASQ_ALWAYS(format, ...) \
     vasqLogStatement(VASQ_LL_ALWAYS, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 #define VASQ_CRITICAL(format, ...) \
@@ -45,27 +45,27 @@ vasqLogStatement(vasqLogLevel_t level, const char* file_name, const char* functi
     vasqLogStatement(VASQ_LL_DEBUG, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 
 void
-vasqHexDump(const char* file_name, const char* function_name, int line_no, const char* name,
-            const void* data, size_t size);
+vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
+            const void *data, size_t size);
 #define VASQ_HEXDUMP(name, data, size) vasqHexDump(__FILE__, __func__, __LINE__, name, data, size)
 
-void*
-vasqMalloc(const char* file_name, const char* function_name, int line_no, size_t size);
+void *
+vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t size);
 #define VASQ_MALLOC(size) vasqMalloc(__FILE__, __func__, __LINE__, size)
 
-void*
-vasqCalloc(const char* file_name, const char* function_name, int line_no, size_t nmemb, size_t size);
+void *
+vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t nmemb, size_t size);
 #define VASQ_CALLOC(nmemb, size) vasqCalloc(__FILE__, __func__, __LINE__, nmemb, size)
 
-void*
-vasqRealloc(const char* file_name, const char* function_name, int line_no, void* ptr, size_t size);
+void *
+vasqRealloc(const char *file_name, const char *function_name, int line_no, void *ptr, size_t size);
 #define VASQ_REALLOC(ptr, size) vasqRealloc(__FILE__, __func__, __LINE__, ptr, size)
 
 pid_t
-vasqFork(const char* file_name, const char* function_name, int line_no);
+vasqFork(const char *file_name, const char *function_name, int line_no);
 #define VASQ_FORK() vasqFork(__FILE__, __func__, __LINE__)
 
-const char*
+const char *
 vasqLogLevelName(vasqLogLevel_t level) __attribute__((pure));
 
 #else  // VASQ_ENABLE_LOGGING

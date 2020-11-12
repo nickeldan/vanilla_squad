@@ -1,4 +1,3 @@
-#include <ctype.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -9,6 +8,9 @@ numToBuffer(char *buffer, uintmax_t value);
 
 static unsigned int
 numToBufferHex(char *buffer, uintmax_t value, bool capitalize);
+
+static bool
+safe_isdigit(char c);
 
 ssize_t
 vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...) {
@@ -232,7 +234,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                         value = va_arg(args, uint32_t);
                         index -= numToBufferHex(subbuffer + index - 1, value, false);
                     }
-                } else if (isdigit(c) || c == 'x' || c == 'X') {
+                } else if ( safe_isdigit(c) || c == 'x' || c == 'X') {
                     unsigned int value;
                     int min_length = 0;
                     char padding;
@@ -252,7 +254,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                         padding = ' ';
                     }
 
-                    if (isdigit(c)) {
+                    if (safe_isdigit(c)) {
                         min_length = c - '0';
                         c = *(++format);
                     }
@@ -326,4 +328,10 @@ numToBufferHex(char *buffer, uintmax_t value, bool capitalize) {
     }
 
     return ret;
+}
+
+static bool
+safe_isdigit(char c)
+{
+    return c >= '0' && c <= '9';
 }

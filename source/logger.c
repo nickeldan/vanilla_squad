@@ -28,13 +28,13 @@ static unsigned int
 logLevelNamePadding(vasqLogLevel_t level);
 
 static void
-inc_snprintf(char **output, size_t *capacity, const char *format, ...);
+incSnprintf(char **output, size_t *capacity, const char *format, ...);
 
 static void
-inc_vsnprintf(char **output, size_t *capacity, const char *format, va_list args);
+incVsnprintf(char **output, size_t *capacity, const char *format, va_list args);
 
 static bool
-safe_isprint(char c);
+safeIsprint(char c);
 
 int
 vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
@@ -80,17 +80,17 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     memset(padding, ' ', sizeof(padding));
     padding[logLevelNamePadding(level)] = '\0';
 
-    inc_snprintf(&dst, &remaining, "(%i) (%i) [%s]%s ", log_pid, (int)time(NULL), vasqLogLevelName(level),
+    incSnprintf(&dst, &remaining, "(%i) (%i) [%s]%s ", log_pid, (int)time(NULL), vasqLogLevelName(level),
                  padding);
 
     if (include_file_name_in_log) {
-        inc_snprintf(&dst, &remaining, "%s:", file_name);
+        incSnprintf(&dst, &remaining, "%s:", file_name);
     }
 
-    inc_snprintf(&dst, &remaining, "%s:%i ", function_name, line_no);
+    incSnprintf(&dst, &remaining, "%s:%i ", function_name, line_no);
 
     va_start(args, format);
-    inc_vsnprintf(&dst, &remaining, format, args);
+    incVsnprintf(&dst, &remaining, format, args);
     va_end(args);
     *(dst++) = '\n';
 
@@ -118,27 +118,31 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
     for (size_t k = 0; k < actual_dump_size; k += HEXDUMP_WIDTH) {
         unsigned int line_length;
 
-        inc_snprintf(&dst, &remaining, "\t");
+        incSnprintf(&dst, &remaining, "\t");
 
         line_length = MIN(actual_dump_size - k, HEXDUMP_WIDTH);
         for (unsigned int j = 0; j < line_length; j++) {
-            inc_snprintf(&dst, &remaining, "%02x ", bytes[k + j]);
+            incSnprintf(&dst, &remaining, "%02x ", bytes[k + j]);
         }
 
-        inc_snprintf(&dst, &remaining, "    ");
+        for (unsigned int j=line_length; j<HEXDUMP_WIDTH; j++) {
+            incSnprintf(&dst, &remaining, "   ");
+        }
+
+        incSnprintf(&dst, &remaining, "    ");
 
         for (unsigned int j = 0; j < line_length; j++) {
             char c;
 
             c = bytes[k + j];
-            inc_snprintf(&dst, &remaining, "%c", safe_isprint(c) ? c : '.');
+            incSnprintf(&dst, &remaining, "%c", safeIsprint(c) ? c : '.');
         }
 
-        inc_snprintf(&dst, &remaining, "\n");
+        incSnprintf(&dst, &remaining, "\n");
     }
 
     if (size > actual_dump_size) {
-        inc_snprintf(&dst, &remaining, "\t... (%zu more byte%s)\n", size - actual_dump_size,
+        incSnprintf(&dst, &remaining, "\t... (%zu more byte%s)\n", size - actual_dump_size,
                      (size - actual_dump_size == 1) ? "" : "s");
     }
 
@@ -235,16 +239,16 @@ logLevelNamePadding(vasqLogLevel_t level) {
 }
 
 static void
-inc_snprintf(char **output, size_t *capacity, const char *format, ...) {
+incSnprintf(char **output, size_t *capacity, const char *format, ...) {
     va_list args;
 
     va_start(args, format);
-    inc_vsnprintf(output, capacity, format, args);
+    incVsnprintf(output, capacity, format, args);
     va_end(args);
 }
 
 static void
-inc_vsnprintf(char **output, size_t *capacity, const char *format, va_list args) {
+incVsnprintf(char **output, size_t *capacity, const char *format, va_list args) {
     ssize_t ret;
 
     if (!output || !capacity || !format) {
@@ -259,6 +263,6 @@ inc_vsnprintf(char **output, size_t *capacity, const char *format, va_list args)
 }
 
 static bool
-safe_isprint(char c) {
+safeIsprint(char c) {
     return c >= ' ' && c <= '~';
 }

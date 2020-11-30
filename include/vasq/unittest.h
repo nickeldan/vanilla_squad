@@ -1,5 +1,4 @@
-#ifndef __VANILLA_SQUAD_UNITTEST_H__
-#define __VANILLA_SQUAD_UNITTEST_H__
+#pragma once
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -28,15 +27,14 @@ vasqTesterInit(vasqTester *tester);
         (func)(tester);             \
     } while (0)
 
-#define VASQ_ASSERT_MSG(expr, format, ...)             \
-    do {                                               \
-        if (!(expr)) {                                 \
-            VASQ_ERROR("Assertion failed: %s", #expr); \
-            VASQ_ERROR(format, ##__VA_ARGS__);         \
-            VASQ_TESTER_NAME->success = false;         \
-            VASQ_TESTER_NAME->num_errors++;            \
-            goto test_cleanup;                         \
-        }                                              \
+#define VASQ_ASSERT_MSG(expr, format, ...)     \
+    do {                                       \
+        if (!(expr)) {                         \
+            VASQ_ERROR(format, ##__VA_ARGS__); \
+            VASQ_TESTER_NAME->success = false; \
+            VASQ_TESTER_NAME->num_errors++;    \
+            goto test_cleanup;                 \
+        }                                      \
     } while (0)
 
 #define VASQ_ASSERT(expr)                              \
@@ -57,5 +55,3 @@ vasqTesterInit(vasqTester *tester);
             goto test_cleanup;                   \
         }                                        \
     } while (0)
-
-#endif  // __VANILLA_SQUAD_UNITTEST_H__

@@ -1,8 +1,6 @@
-#ifndef __VANILLA_SQUAD_LOGGER_H__
-#define __VANILLA_SQUAD_LOGGER_H__
+#pragma once
 
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -21,8 +19,8 @@ typedef enum vasqLogLevel {
 #ifdef VASQ_ENABLE_LOGGING
 
 int
-vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name);
-#define VASQ_LOG_INIT(level, out, include_file_name) vasqLogInit(level, out, include_file_name)
+vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name);
+#define VASQ_LOG_INIT(level, fd, include_file_name) vasqLogInit(level, fd, include_file_name)
 
 void
 vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level);
@@ -89,5 +87,3 @@ vasqLogLevelName(vasqLogLevel_t level) __attribute__((pure));
 #define VASQ_PCRITICAL(function_name, errnum) VASQ_CRITICAL("%s: %s", function_name, strerror(errnum))
 #define VASQ_PERROR(function_name, errnum)    VASQ_ERROR("%s: %s", function_name, strerror(errnum))
 #define VASQ_PWARNING(function_name, errnum)  VASQ_WARNING("%s: %s", function_name, strerror(errnum))
-
-#endif  // __VANILLA_SQUAD_LOGGER_H__

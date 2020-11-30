@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <time.h>
 
@@ -5,7 +6,7 @@
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 
-#define MAX_HEXDUMP_SIZE 512
+#define MAX_HEXDUMP_SIZE 1024
 #define HEXDUMP_WIDTH    16
 #if MAX_HEXDUMP_SIZE % HEXDUMP_WIDTH != 0
 #error "MAX_HEXDUMP_SIZE must be a multiple of HEXDUMP_WIDTH."
@@ -37,12 +38,13 @@ static bool
 safeIsprint(char c);
 
 int
-vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
-    if (!out) {
+vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name)
+{
+    if (fd < 0) {
         return VASQ_RET_IMPROPER_USE;
     }
 
-    log_fd = dup(fileno(out));
+    log_fd = dup(fd);
     if (log_fd < 0) {
         perror("dup");
         return VASQ_RET_REDIRECT_FAIL;
@@ -58,7 +60,8 @@ vasqLogInit(vasqLogLevel_t level, FILE *out, bool include_file_name) {
 }
 
 void
-vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level) {
+vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level)
+{
     max_log_level = level;
 
     vasqLogStatement(VASQ_LL_ALWAYS, file_name, function_name, line_no, "Log level set to %s",
@@ -67,7 +70,8 @@ vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, v
 
 void
 vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, int line_no,
-                 const char *format, ...) {
+                 const char *format, ...)
+{
     char output[1024], padding[8];
     char *dst = output;
     va_list args;
@@ -81,7 +85,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     padding[logLevelNamePadding(level)] = '\0';
 
     incSnprintf(&dst, &remaining, "(%i) (%i) [%s]%s ", log_pid, (int)time(NULL), vasqLogLevelName(level),
-                 padding);
+                padding);
 
     if (include_file_name_in_log) {
         incSnprintf(&dst, &remaining, "%s:", file_name);
@@ -101,9 +105,10 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
 
 void
 vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
-            const void *data, size_t size) {
+            const void *data, size_t size)
+{
     const unsigned char *bytes = data;
-    char output[4096];
+    char output[5000];
     char *dst = output;
     size_t actual_dump_size, remaining = sizeof(output);
 
@@ -118,14 +123,14 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
     for (size_t k = 0; k < actual_dump_size; k += HEXDUMP_WIDTH) {
         unsigned int line_length;
 
-        incSnprintf(&dst, &remaining, "\t");
+        incSnprintf(&dst, &remaining, "\t%04x  ", k);
 
         line_length = MIN(actual_dump_size - k, HEXDUMP_WIDTH);
         for (unsigned int j = 0; j < line_length; j++) {
             incSnprintf(&dst, &remaining, "%02x ", bytes[k + j]);
         }
 
-        for (unsigned int j=line_length; j<HEXDUMP_WIDTH; j++) {
+        for (unsigned int j = line_length; j < HEXDUMP_WIDTH; j++) {
             incSnprintf(&dst, &remaining, "   ");
         }
 
@@ -143,7 +148,7 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
 
     if (size > actual_dump_size) {
         incSnprintf(&dst, &remaining, "\t... (%zu more byte%s)\n", size - actual_dump_size,
-                     (size - actual_dump_size == 1) ? "" : "s");
+                    (size - actual_dump_size == 1) ? "" : "s");
     }
 
     if (write(log_fd, output, dst - output) < 0) {
@@ -152,7 +157,8 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
 }
 
 void *
-vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t size) {
+vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t size)
+{
     void *ptr;
 
     ptr = malloc(size);
@@ -164,7 +170,8 @@ vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t
 }
 
 void *
-vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t nmemb, size_t size) {
+vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t nmemb, size_t size)
+{
     void *ptr;
 
     ptr = calloc(nmemb, size);
@@ -176,7 +183,8 @@ vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t
 }
 
 void *
-vasqRealloc(const char *file_name, const char *function_name, int line_no, void *ptr, size_t size) {
+vasqRealloc(const char *file_name, const char *function_name, int line_no, void *ptr, size_t size)
+{
     void *success;
 
     success = realloc(ptr, size);
@@ -188,7 +196,8 @@ vasqRealloc(const char *file_name, const char *function_name, int line_no, void 
 }
 
 pid_t
-vasqFork(const char *file_name, const char *function_name, int line_no) {
+vasqFork(const char *file_name, const char *function_name, int line_no)
+{
     pid_t child;
 
     switch ((child = fork())) {
@@ -208,7 +217,8 @@ vasqFork(const char *file_name, const char *function_name, int line_no) {
 }
 
 const char *
-vasqLogLevelName(vasqLogLevel_t level) {
+vasqLogLevelName(vasqLogLevel_t level)
+{
     switch (level) {
     case VASQ_LL_ALWAYS: return "ALWAYS";
     case VASQ_LL_CRITICAL: return "CRITICAL";
@@ -221,12 +231,14 @@ vasqLogLevelName(vasqLogLevel_t level) {
 }
 
 static void
-logShutdown(void) {
+logShutdown(void)
+{
     close(log_fd);
 }
 
 static unsigned int
-logLevelNamePadding(vasqLogLevel_t level) {
+logLevelNamePadding(vasqLogLevel_t level)
+{
     switch (level) {
     case VASQ_LL_ALWAYS: return 2;
     case VASQ_LL_CRITICAL: return 0;
@@ -239,7 +251,8 @@ logLevelNamePadding(vasqLogLevel_t level) {
 }
 
 static void
-incSnprintf(char **output, size_t *capacity, const char *format, ...) {
+incSnprintf(char **output, size_t *capacity, const char *format, ...)
+{
     va_list args;
 
     va_start(args, format);
@@ -248,12 +261,9 @@ incSnprintf(char **output, size_t *capacity, const char *format, ...) {
 }
 
 static void
-incVsnprintf(char **output, size_t *capacity, const char *format, va_list args) {
+incVsnprintf(char **output, size_t *capacity, const char *format, va_list args)
+{
     ssize_t ret;
-
-    if (!output || !capacity || !format) {
-        return;
-    }
 
     ret = vasqSafeVsnprintf(*output, *capacity, format, args);
     if (ret > 0) {
@@ -263,6 +273,7 @@ incVsnprintf(char **output, size_t *capacity, const char *format, va_list args) 
 }
 
 static bool
-safeIsprint(char c) {
+safeIsprint(char c)
+{
     return c >= ' ' && c <= '~';
 }

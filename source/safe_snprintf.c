@@ -13,7 +13,8 @@ static bool
 safe_isdigit(char c);
 
 ssize_t
-vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...) {
+vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
+{
     ssize_t ret;
     va_list args;
 
@@ -25,7 +26,8 @@ vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...) {
 }
 
 ssize_t
-vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
+vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
+{
     char *start = buffer;
 
     if (!buffer || size == 0 || !format) {
@@ -40,17 +42,20 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
             c = *(++format);
             if (c == '\0') {
                 return -1;
-            } else if (c == '%') {
+            }
+            else if (c == '%') {
                 *(buffer++) = '%';
                 size--;
-            } else if (c == 's') {
+            }
+            else if (c == 's') {
                 for (const char *string = va_arg(args, const char *); *string; string++) {
                     *(buffer++) = *string;
                     if (--size == 0) {
                         goto done;
                     }
                 }
-            } else if (c == '.') {
+            }
+            else if (c == '.') {
                 unsigned int length;
                 const char *string;
 
@@ -76,12 +81,14 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                         goto done;
                     }
                 }
-            } else if (c == 'c') {
+            }
+            else if (c == 'c') {
                 *(buffer++) = va_arg(args, int);
                 if (--size == 0) {
                     goto done;
                 }
-            } else {
+            }
+            else {
                 bool is_long;
                 char subbuffer[39];  // Big enough to hold a 128-bit unsigned integer without the null
                                      // terminator.
@@ -90,7 +97,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                 if (c == 'l') {
                     is_long = true;
                     c = *(++format);
-                } else {
+                }
+                else {
                     is_long = false;
                 }
 
@@ -100,13 +108,15 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
 
                         value = va_arg(args, unsigned long);
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else {
+                    }
+                    else {
                         unsigned int value;
 
                         value = va_arg(args, unsigned int);
                         index -= numToBuffer(subbuffer + index - 1, value);
                     }
-                } else if (c == 'd' || c == 'i') {
+                }
+                else if (c == 'd' || c == 'i') {
                     if (is_long) {
                         long value;
 
@@ -119,7 +129,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                             value *= -1;
                         }
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else {
+                    }
+                    else {
                         int value;
 
                         value = va_arg(args, int);
@@ -132,7 +143,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                         }
                         index -= numToBuffer(subbuffer + index - 1, value);
                     }
-                } else if (c == 'l') {
+                }
+                else if (c == 'l') {
                     // is_long must be true.
 
                     c = *(++format);
@@ -148,15 +160,18 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                             value *= -1;
                         }
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else if (c == 'u') {
+                    }
+                    else if (c == 'u') {
                         unsigned long long value;
 
                         value = va_arg(args, unsigned long long);
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else {
+                    }
+                    else {
                         return -1;
                     }
-                } else if (c == 'z') {
+                }
+                else if (c == 'z') {
                     if (is_long) {
                         return -1;
                     }
@@ -167,7 +182,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
 
                         value = va_arg(args, size_t);
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else if (c == 'i') {
+                    }
+                    else if (c == 'i') {
                         ssize_t value;
 
                         value = va_arg(args, ssize_t);
@@ -179,10 +195,12 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                             value *= -1;
                         }
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else {
+                    }
+                    else {
                         return -1;
                     }
-                } else if (c == 'j') {
+                }
+                else if (c == 'j') {
                     if (is_long) {
                         return -1;
                     }
@@ -193,7 +211,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
 
                         value = va_arg(args, uintmax_t);
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else if (c == 'i') {
+                    }
+                    else if (c == 'i') {
                         intmax_t value;
 
                         value = va_arg(args, intmax_t);
@@ -205,10 +224,12 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                             value *= -1;
                         }
                         index -= numToBuffer(subbuffer + index - 1, value);
-                    } else {
+                    }
+                    else {
                         return -1;
                     }
-                } else if (c == 'p') {
+                }
+                else if (c == 'p') {
                     if (is_long) {
                         return -1;
                     }
@@ -228,13 +249,15 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
 
                         value = va_arg(args, uint64_t);
                         index -= numToBufferHex(subbuffer + index - 1, value, false);
-                    } else {
+                    }
+                    else {
                         uint32_t value;
 
                         value = va_arg(args, uint32_t);
                         index -= numToBufferHex(subbuffer + index - 1, value, false);
                     }
-                } else if ( safe_isdigit(c) || c == 'x' || c == 'X') {
+                }
+                else if (safe_isdigit(c) || c == 'x' || c == 'X') {
                     unsigned int value;
                     int min_length = 0;
                     char padding;
@@ -250,7 +273,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                         if (c == '\0') {
                             return -1;
                         }
-                    } else {
+                    }
+                    else {
                         padding = ' ';
                     }
 
@@ -261,9 +285,11 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
 
                     if (c == 'x') {
                         capitalize = false;
-                    } else if (c == 'X') {
+                    }
+                    else if (c == 'X') {
                         capitalize = true;
-                    } else {
+                    }
+                    else {
                         return -1;
                     }
 
@@ -277,7 +303,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                     while ((sizeof(subbuffer) - index) < (unsigned int)min_length && index > 0) {
                         subbuffer[--index] = padding;
                     }
-                } else {
+                }
+                else {
                     return -1;
                 }
 
@@ -288,7 +315,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args) {
                     }
                 }
             }
-        } else {
+        }
+        else {
             *(buffer++) = c;
             size--;
         }
@@ -301,7 +329,8 @@ done:
 }
 
 static unsigned int
-numToBuffer(char *buffer, uintmax_t value) {
+numToBuffer(char *buffer, uintmax_t value)
+{
     unsigned int ret;
 
     for (ret = 0; value > 0; ret++) {
@@ -313,7 +342,8 @@ numToBuffer(char *buffer, uintmax_t value) {
 }
 
 static unsigned int
-numToBufferHex(char *buffer, uintmax_t value, bool capitalize) {
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
+{
     unsigned int ret;
     char hex_letter;
 

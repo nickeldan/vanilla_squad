@@ -1,11 +1,10 @@
-#ifndef __VANILLA_SQUAD_DEFINITIONS_H__
-#define __VANILLA_SQUAD_DEFINITIONS_H__
+#pragma once
 
 #include <errno.h>
 #include <stdbool.h>
 #include <sys/types.h>
 
-#define NO_OP (void)0
+#define NO_OP ((void)0)
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -24,5 +23,3 @@ enum vasqRetValue {
 
     VASQ_RET_UNUSED,
 };
-
-#endif  // __VANILLA_SQUAD_DEFINITIONS_H__

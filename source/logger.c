@@ -77,7 +77,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     va_list args;
     size_t remaining = sizeof(output) - 1;  // Leave room for the '\n'.
 
-    if (level > max_log_level || log_fd == -1) {
+    if (level > max_log_level || log_fd == -1 || level == VASQ_LL_RAWONLY) {
         return;
     }
 
@@ -91,14 +91,31 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
         incSnprintf(&dst, &remaining, "%s:", file_name);
     }
 
-    incSnprintf(&dst, &remaining, "%s:%i ", function_name, line_no);
+    incSnprintf(&dst, &remaining, "%s:%i: ", function_name, line_no);
 
     va_start(args, format);
     incVsnprintf(&dst, &remaining, format, args);
     va_end(args);
+
     *(dst++) = '\n';
 
     if (write(log_fd, output, dst - output) < 0) {
+        NO_OP;
+    }
+}
+
+void
+vasqRawLog(const char *format, ...)
+{
+    ssize_t written;
+    char output[1024];
+    va_list args;
+
+    va_start(args, format);
+    written = vasqSafeVsnprintf(output, sizeof(output), format, args);
+    va_end(args);
+
+    if ( written > 0 && write(log_fd, output, written) < 0 ) {
         NO_OP;
     }
 }

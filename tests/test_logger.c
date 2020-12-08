@@ -22,7 +22,9 @@ int main() {
     }
     VASQ_HEXDUMP("Short data", short_data, sizeof(short_data));
 
-    VASQ_HEXDUMP("Lorem ipsum", data, sizeof(data));
+    VASQ_HEXDUMP("Long data", data, sizeof(data));
+
+    VASQ_INFO("Printing 0: %i", 0);
 
     return 0;
 }

@@ -10,7 +10,7 @@ static unsigned int
 numToBufferHex(char *buffer, uintmax_t value, bool capitalize);
 
 static bool
-safe_isdigit(char c);
+safeIsdigit(char c);
 
 ssize_t
 vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
@@ -50,9 +50,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
             else if (c == 's') {
                 for (const char *string = va_arg(args, const char *); *string; string++) {
                     *(buffer++) = *string;
-                    if (--size == 0) {
-                        goto done;
-                    }
+                    size--;
                 }
             }
             else if (c == '.') {
@@ -77,16 +75,12 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     }
 
                     *(buffer++) = c;
-                    if (--size == 0) {
-                        goto done;
-                    }
+                    size--;
                 }
             }
             else if (c == 'c') {
                 *(buffer++) = va_arg(args, int);
-                if (--size == 0) {
-                    goto done;
-                }
+                size--;
             }
             else {
                 bool is_long;
@@ -257,7 +251,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         index -= numToBufferHex(subbuffer + index - 1, value, false);
                     }
                 }
-                else if (safe_isdigit(c) || c == 'x' || c == 'X') {
+                else if (safeIsdigit(c) || c == 'x' || c == 'X') {
                     unsigned int value;
                     int min_length = 0;
                     char padding;
@@ -278,7 +272,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         padding = ' ';
                     }
 
-                    if (safe_isdigit(c)) {
+                    if (safeIsdigit(c)) {
                         min_length = c - '0';
                         c = *(++format);
                     }
@@ -306,6 +300,10 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 }
                 else {
                     return -1;
+                }
+
+                if (index == sizeof(subbuffer)) {
+                    subbuffer[--index] = '0';
                 }
 
                 while (index < sizeof(subbuffer)) {
@@ -361,7 +359,7 @@ numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
 }
 
 static bool
-safe_isdigit(char c)
+safeIsdigit(char c)
 {
     return c >= '0' && c <= '9';
 }

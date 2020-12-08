@@ -8,7 +8,8 @@
 #include "definitions.h"
 
 typedef enum vasqLogLevel {
-    VASQ_LL_ALWAYS = 0,
+    VASQ_LL_RAWONLY = -1,
+    VASQ_LL_ALWAYS,
     VASQ_LL_CRITICAL,
     VASQ_LL_ERROR,
     VASQ_LL_WARNING,
@@ -41,6 +42,10 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     vasqLogStatement(VASQ_LL_INFO, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 #define VASQ_DEBUG(format, ...) \
     vasqLogStatement(VASQ_LL_DEBUG, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+
+void
+vasqRawLog(const char *format, ...);
+#define VASQ_RAWLOG(format, ...) vasqRawLog(format, ##__VA_ARGS__)
 
 void
 vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
@@ -76,6 +81,7 @@ vasqLogLevelName(vasqLogLevel_t level) __attribute__((pure));
 #define VASQ_WARNING(format, ...)                    NO_OP
 #define VASQ_INFO(format, ...)                       NO_OP
 #define VASQ_DEBUG(format, ...)                      NO_OP
+#define VASQ_RAWLOG(format, ...)                     NO_OP
 #define VASQ_HEXDUMP(name, data, size)               NO_OP
 #define VASQ_MALLOC(size)                            malloc(size)
 #define VASQ_CALLOC(nmemb, size)                     calloc(nmemb, size)

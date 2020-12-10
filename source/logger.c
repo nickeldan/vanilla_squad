@@ -2,7 +2,9 @@
 #include <string.h>
 #include <time.h>
 
+#ifndef VASQ_ENABLE_LOGGING
 #define VASQ_ENABLE_LOGGING
+#endif
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 
@@ -77,7 +79,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     va_list args;
     size_t remaining = sizeof(output) - 1;  // Leave room for the '\n'.
 
-    if (level > max_log_level || log_fd == -1 || level == VASQ_LL_RAWONLY) {
+    if (level > max_log_level || log_fd == -1 || max_log_level == VASQ_LL_RAWONLY) {
         return;
     }
 

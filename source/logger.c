@@ -14,10 +14,6 @@
 #error "MAX_HEXDUMP_SIZE must be a multiple of HEXDUMP_WIDTH."
 #endif
 
-#ifndef VASQ_NEW_CHILD_LOG_LEVEL
-#define VASQ_NEW_CHILD_LOG_LEVEL VASQ_LL_ALWAYS
-#endif
-
 // Global variables
 static vasqLogLevel_t max_log_level;
 static int log_fd = -1;
@@ -227,7 +223,7 @@ vasqFork(const char *file_name, const char *function_name, int line_no)
     case 0: log_pid = getpid(); break;
 
     default:
-        vasqLogStatement(VASQ_NEW_CHILD_LOG_LEVEL, file_name, function_name, line_no,
+        vasqLogStatement(VASQ_LL_ALWAYS, file_name, function_name, line_no,
                          "Child process started (PID = %i)", child);
         break;
     }
@@ -252,6 +248,7 @@ vasqLogLevelName(vasqLogLevel_t level)
 static void
 logShutdown(void)
 {
+    VASQ_ALWAYS("Process exiting");
     close(log_fd);
 }
 

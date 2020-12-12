@@ -58,7 +58,7 @@ vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name)
 }
 
 void
-vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, vasqLogLevel_t level)
+vasqSetLogLevel(const char *file_name, const char *function_name, unsigned int line_no, vasqLogLevel_t level)
 {
     max_log_level = level;
 
@@ -67,7 +67,7 @@ vasqSetLogLevel(const char *file_name, const char *function_name, int line_no, v
 }
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, int line_no,
+vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, unsigned int line_no,
                  const char *format, ...)
 {
     char output[1024], padding[8];
@@ -119,7 +119,7 @@ vasqRawLog(const char *format, ...)
 }
 
 void
-vasqHexDump(const char *file_name, const char *function_name, int line_no, const char *name,
+vasqHexDump(const char *file_name, const char *function_name, unsigned int line_no, const char *name,
             const void *data, size_t size)
 {
     const unsigned char *bytes = data;
@@ -172,7 +172,7 @@ vasqHexDump(const char *file_name, const char *function_name, int line_no, const
 }
 
 void *
-vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t size)
+vasqMalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t size)
 {
     void *ptr;
 
@@ -185,7 +185,7 @@ vasqMalloc(const char *file_name, const char *function_name, int line_no, size_t
 }
 
 void *
-vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t nmemb, size_t size)
+vasqCalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t nmemb, size_t size)
 {
     void *ptr;
 
@@ -198,7 +198,7 @@ vasqCalloc(const char *file_name, const char *function_name, int line_no, size_t
 }
 
 void *
-vasqRealloc(const char *file_name, const char *function_name, int line_no, void *ptr, size_t size)
+vasqRealloc(const char *file_name, const char *function_name, unsigned int line_no, void *ptr, size_t size)
 {
     void *success;
 
@@ -211,7 +211,7 @@ vasqRealloc(const char *file_name, const char *function_name, int line_no, void 
 }
 
 pid_t
-vasqFork(const char *file_name, const char *function_name, int line_no)
+vasqFork(const char *file_name, const char *function_name, unsigned int line_no)
 {
     pid_t child;
 

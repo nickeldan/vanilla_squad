@@ -24,12 +24,13 @@ vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name);
 #define VASQ_LOG_INIT(level, fd, include_file_name) vasqLogInit(level, fd, include_file_name)
 
 void
-vasqSetLogLevel(const char *file_name, const char *function_name, unsigned int line_no, vasqLogLevel_t level);
+vasqSetLogLevel(const char *file_name, const char *function_name, unsigned int line_no,
+                vasqLogLevel_t level);
 #define VASQ_SET_LOG_LEVEL(level) vasqSetLogLevel(__FILE__, __func__, __LINE__, level)
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, unsigned int line_no,
-                 const char *format, ...);
+vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
+                 unsigned int line_no, const char *format, ...);
 #define VASQ_ALWAYS(format, ...) \
     vasqLogStatement(VASQ_LL_ALWAYS, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 #define VASQ_CRITICAL(format, ...) \
@@ -57,7 +58,8 @@ vasqMalloc(const char *file_name, const char *function_name, unsigned int line_n
 #define VASQ_MALLOC(size) vasqMalloc(__FILE__, __func__, __LINE__, size)
 
 void *
-vasqCalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t nmemb, size_t size);
+vasqCalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t nmemb,
+           size_t size);
 #define VASQ_CALLOC(nmemb, size) vasqCalloc(__FILE__, __func__, __LINE__, nmemb, size)
 
 void *

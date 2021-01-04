@@ -11,7 +11,7 @@ endif
 
 SHARED_LIBRARY := lib$(LIBNAME).so
 STATIC_LIBRARY := lib$(LIBNAME).a
-OBJECT_FILES := source/logger.o source/safe_snprintf.o
+OBJECT_FILES := $(patsubst %.c,%.o,$(wildcard source/*.c))
 TESTS := logger_test
 
 .PHONY: all clean

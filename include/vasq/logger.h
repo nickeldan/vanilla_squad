@@ -45,8 +45,15 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     vasqLogStatement(VASQ_LL_DEBUG, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 
 void
+vasqVLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
+                  unsigned int line_no, const char *format, va_list args);
+
+void
 vasqRawLog(const char *format, ...);
 #define VASQ_RAWLOG(format, ...) vasqRawLog(format, ##__VA_ARGS__)
+
+void
+vasqVRawLog(const char *format, va_list args);
 
 void
 vasqHexDump(const char *file_name, const char *function_name, unsigned int line_no, const char *name,

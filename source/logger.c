@@ -67,12 +67,22 @@ vasqSetLogLevel(const char *file_name, const char *function_name, unsigned int l
 }
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name, unsigned int line_no,
-                 const char *format, ...)
+vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
+                 unsigned int line_no, const char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    vasqVLogStatement(level, file_name, function_name, line_no, format, args);
+    va_end(args);
+}
+
+void
+vasqVLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
+                  unsigned int line_no, const char *format, va_list args)
 {
     char output[1024], padding[8];
     char *dst = output;
-    va_list args;
     size_t remaining = sizeof(output) - 1;  // Leave room for the '\n'.
 
     if (level > max_log_level || log_fd == -1 || level == VASQ_LL_RAWONLY) {
@@ -90,10 +100,7 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
     }
 
     incSnprintf(&dst, &remaining, "%s:%i: ", function_name, line_no);
-
-    va_start(args, format);
     incVsnprintf(&dst, &remaining, format, args);
-    va_end(args);
 
     *(dst++) = '\n';
 
@@ -105,15 +112,22 @@ vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *functi
 void
 vasqRawLog(const char *format, ...)
 {
-    ssize_t written;
-    char output[1024];
     va_list args;
 
     va_start(args, format);
-    written = vasqSafeVsnprintf(output, sizeof(output), format, args);
+    vasqVRawLog(format, args);
     va_end(args);
+}
 
-    if ( written > 0 && write(log_fd, output, written) < 0 ) {
+void
+vasqVRawLog(const char *format, va_list args)
+{
+    ssize_t written;
+    char output[1024];
+
+    written = vasqSafeVsnprintf(output, sizeof(output), format, args);
+
+    if (written > 0 && write(log_fd, output, written) < 0) {
         NO_OP;
     }
 }

@@ -34,7 +34,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
         return -1;
     }
 
-    for (size--; *format && size > 0; format++) { // The -- is to leave space for the null terminator.
+    for (size--; *format && size > 0; format++) {  // The -- is to leave space for the null terminator.
         char c;
 
         c = *format;

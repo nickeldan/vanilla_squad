@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VANILLA_SQUAD_LOGGER_H
+#define VANILLA_SQUAD_LOGGER_H
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -102,3 +103,5 @@ vasqLogLevelName(vasqLogLevel_t level) __attribute__((pure));
 #define VASQ_PCRITICAL(function_name, errnum) VASQ_CRITICAL("%s: %s", function_name, strerror(errnum))
 #define VASQ_PERROR(function_name, errnum)    VASQ_ERROR("%s: %s", function_name, strerror(errnum))
 #define VASQ_PWARNING(function_name, errnum)  VASQ_WARNING("%s: %s", function_name, strerror(errnum))
+
+#endif // VANILLA_SQUAD_LOGGER_H

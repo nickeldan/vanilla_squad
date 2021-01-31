@@ -224,6 +224,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     }
                 }
                 else if (c == 'p') {
+                    uintptr_t value;
+
                     if (is_long) {
                         return -1;
                     }
@@ -238,18 +240,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         goto done;
                     }
 
-                    if (sizeof(void *) == sizeof(uint64_t)) {
-                        uint64_t value;
-
-                        value = va_arg(args, uint64_t);
-                        index -= numToBufferHex(subbuffer + index - 1, value, false);
-                    }
-                    else {
-                        uint32_t value;
-
-                        value = va_arg(args, uint32_t);
-                        index -= numToBufferHex(subbuffer + index - 1, value, false);
-                    }
+                    value = (uintptr_t)va_arg(args, void *);
+                    index -= numToBufferHex(subbuffer + index - 1, value, false);
                 }
                 else if (safeIsdigit(c) || c == 'x' || c == 'X') {
                     unsigned int value;

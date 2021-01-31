@@ -1,4 +1,4 @@
-VASQ_DIR ?= $(PWD)
+VASQ_DIR ?= .
 
 VASQ_LIBNAME := vanillasquad
 VASQ_SHARED_LIBRARY := $(VASQ_DIR)/lib$(VASQ_LIBNAME).so

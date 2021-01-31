@@ -10,9 +10,11 @@ endif
 
 TESTS := logger_test
 
+_all: all
+
 include vasq.mk
 
-.PHONY: all clean $(VASQ_PHONY_TARGETS)
+.PHONY: _all all clean $(VASQ_PHONY_TARGETS)
 
 all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 

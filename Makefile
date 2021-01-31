@@ -1,7 +1,6 @@
 CC ?= gcc
 debug ?= no
 
-LIBNAME := vanillasquad
 COMPILER_FLAGS := -std=gnu11 -fpic -ffunction-sections -fdiagnostics-color -Wall -Wextra
 ifeq ($(debug),yes)
     COMPILER_FLAGS += -O0 -g -DDEBUG
@@ -9,29 +8,19 @@ else
     COMPILER_FLAGS += -O3 -DNDEBUG
 endif
 
-SHARED_LIBRARY := lib$(LIBNAME).so
-STATIC_LIBRARY := lib$(LIBNAME).a
-OBJECT_FILES := $(patsubst %.c,%.o,$(wildcard source/*.c))
 TESTS := logger_test
 
 .PHONY: all clean
 
-all: $(SHARED_LIBRARY) $(STATIC_LIBRARY) $(TESTS)
+include vasq.mk
 
-$(SHARED_LIBRARY): $(OBJECT_FILES)
-	$(CC) -shared -o $@ $^
+all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 
-$(STATIC_LIBRARY): $(OBJECT_FILES)
-	ar rcs $@ $^
-
-source/%.o: source/%.c include/vasq/*.h
-	cd source && $(CC) $(COMPILER_FLAGS) -I../include -c $(notdir $<)
-
-%_test: tests/test_%.o lib$(LIBNAME).a
+%_test: tests/test_%.o $(VASQ_STATIC_LIBRARY)
 	$(CC) -o $@ $^
 
 tests/test_%.o: tests/test_%.c include/vasq/*.h
 	cd tests && $(CC) $(COMPILER_FLAGS) -DVASQ_ENABLE_LOGGING -I../include -c $(notdir $<)
 
 clean:
-	rm -f $(SHARED_LIBRARY) $(STATIC_LIBRARY) $(OBJECT_FILES) $(TESTS) tests/*.o
+	rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES) $(TESTS) tests/*.o

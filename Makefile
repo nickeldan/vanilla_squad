@@ -21,7 +21,7 @@ all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 %_test: tests/test_%.o $(VASQ_STATIC_LIBRARY)
 	$(CC) -o $@ $^
 
-tests/test_%.o: tests/test_%.c include/vasq/*.h
-	cd tests && $(CC) $(COMPILER_FLAGS) -DVASQ_ENABLE_LOGGING -I../include -c $(notdir $<)
+tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
+	$(CC) $(COMPILER_FLAGS) -DVASQ_ENABLE_LOGGING -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
 clean: vasq_clean

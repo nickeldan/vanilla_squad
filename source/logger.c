@@ -96,7 +96,16 @@ vasqVLogStatement(vasqLogLevel_t level, const char *file_name, const char *funct
                 padding);
 
     if (include_file_name_in_log) {
-        incSnprintf(&dst, &remaining, "%s:", file_name);
+        size_t idx;
+
+        for (idx=strlen(file_name); idx>0; idx--) {
+            if ( file_name[idx] == '/' ) {
+                idx++;
+                break;
+            }
+        }
+
+        incSnprintf(&dst, &remaining, "%s:", file_name+idx);
     }
 
     incSnprintf(&dst, &remaining, "%s:%i: ", function_name, line_no);

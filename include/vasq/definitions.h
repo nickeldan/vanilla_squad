@@ -1,5 +1,5 @@
-#ifndef __VANILLA_SQUAD_DEFINITIONS_H__
-#define __VANILLA_SQUAD_DEFINITIONS_H__
+#ifndef VANILLA_SQUAD_DEFINITIONS_H
+#define VANILLA_SQUAD_DEFINITIONS_H
 
 #include <errno.h>
 #include <stdbool.h>
@@ -25,4 +25,4 @@ enum vasqRetValue {
     VASQ_RET_UNUSED,
 };
 
-#endif // __VANILLA_SQUAD_DEFINITIONS_H__
+#endif // VANILLA_SQUAD_DEFINITIONS_H

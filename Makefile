@@ -13,7 +13,7 @@ TESTS := logger_test
 all: _all
 
 VASQ_DIR := .
-include vasq.mk
+include make.mk
 
 .PHONY: all _all clean $(CLEAN_TARGETS)
 

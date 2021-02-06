@@ -1,20 +1,21 @@
 CC ?= gcc
 debug ?= no
 
-COMPILER_FLAGS := -std=gnu11 -fpic -ffunction-sections -fdiagnostics-color -Wall -Wextra
+CFLAGS := -std=gnu11 -fdiagnostics-color -Wall -Wextra
 ifeq ($(debug),yes)
-    COMPILER_FLAGS += -O0 -g -DDEBUG
+    CFLAGS += -O0 -g -DDEBUG
 else
-    COMPILER_FLAGS += -O3 -DNDEBUG
+    CFLAGS += -O3 -DNDEBUG
 endif
 
 TESTS := logger_test
 
 all: _all
 
+VASQ_DIR := .
 include vasq.mk
 
-.PHONY: all _all clean $(VASQ_PHONY_TARGETS)
+.PHONY: all _all clean $(CLEAN_TARGETS)
 
 _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 
@@ -22,6 +23,6 @@ _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 	$(CC) -o $@ $^
 
 tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
-	$(CC) $(COMPILER_FLAGS) -DVASQ_ENABLE_LOGGING -I$(VASQ_INCLUDE_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) -DVASQ_ENABLE_LOGGING -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
-clean: vasq_clean
+clean: $(CLEAN_TARGETS)

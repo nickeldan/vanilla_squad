@@ -15,7 +15,7 @@ $(VASQ_STATIC_LIBRARY): $(VASQ_OBJECT_FILES)
 	ar rcs $@ $^
 
 $(VASQ_DIR)/source/%.o: $(VASQ_DIR)/source/%.c $(VASQ_HEADER_FILES)
-	$(CC) $(CFLAGS) -DVASQ_ENABLE_LOGGING -fpic -ffunction-sections -I$(VASQ_INCLUDE_DIR) -o $@ -c $<
+	$(CC) $(CFLAGS) -fpic -ffunction-sections -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
 vasq_clean:
 	rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES)

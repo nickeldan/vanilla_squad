@@ -39,7 +39,7 @@ int
 vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name)
 {
     if (fd < 0) {
-        return VASQ_RET_IMPROPER_USE;
+        return VASQ_RET_USAGE;
     }
 
     log_fd = dup(fd);

@@ -9,7 +9,8 @@
 #include "definitions.h"
 
 typedef enum vasqLogLevel {
-    VASQ_LL_RAWONLY = -1,
+    VASQ_LL_NONE = -2,
+    VASQ_LL_RAWONLY,
     VASQ_LL_ALWAYS,
     VASQ_LL_CRITICAL,
     VASQ_LL_ERROR,
@@ -18,90 +19,102 @@ typedef enum vasqLogLevel {
     VASQ_LL_DEBUG,
 } vasqLogLevel_t;
 
-#ifdef VASQ_ENABLE_LOGGING
+typedef struct vasqLogger vasqLogger;
+
+typedef void (*vasqLoggerDataProcessor)(void *, char **, size_t *);
+
+/*
+    Format symbols:
+
+    %M : Message string
+    %p : PID
+    %L : Log level
+    %u : Unix epoch time in seconds
+    %t : "Pretty" timestamp
+    %h : Hour
+    %m : Minute
+    %s : Second
+    %F : File name
+    %f : Funciton name
+    %l : Line number
+    %x : User data
+    %_ : Log level name padding
+    %% : Literal percent sign
+*/
 
 int
-vasqLogInit(vasqLogLevel_t level, int fd, bool include_file_name);
-#define VASQ_LOG_INIT(level, fd, include_file_name) vasqLogInit(level, fd, include_file_name)
+vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDataProcessor processor,
+                 void *user_data, vasqLogger **logger);
 
 void
-vasqSetLogLevel(const char *file_name, const char *function_name, unsigned int line_no,
-                vasqLogLevel_t level);
-#define VASQ_SET_LOG_LEVEL(level) vasqSetLogLevel(__FILE__, __func__, __LINE__, level)
+vasqLoggerFree(vasqLogger *logger);
+
+bool
+vasqSetLoggerFormat(vasqLogger *logger, const char *format);
 
 void
-vasqLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
-                 unsigned int line_no, const char *format, ...);
-#define VASQ_ALWAYS(format, ...) \
-    vasqLogStatement(VASQ_LL_ALWAYS, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
-#define VASQ_CRITICAL(format, ...) \
-    vasqLogStatement(VASQ_LL_CRITICAL, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
-#define VASQ_ERROR(format, ...) \
-    vasqLogStatement(VASQ_LL_ERROR, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
-#define VASQ_WARNING(format, ...) \
-    vasqLogStatement(VASQ_LL_WARNING, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
-#define VASQ_INFO(format, ...) \
-    vasqLogStatement(VASQ_LL_INFO, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
-#define VASQ_DEBUG(format, ...) \
-    vasqLogStatement(VASQ_LL_DEBUG, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+vasqSetLogLevel(vasqLogger *logger, vasqLogLevel_t level);
 
 void
-vasqVLogStatement(vasqLogLevel_t level, const char *file_name, const char *function_name,
-                  unsigned int line_no, const char *format, va_list args);
+vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor, void *user_data);
 
 void
-vasqRawLog(const char *format, ...);
-#define VASQ_RAWLOG(format, ...) vasqRawLog(format, ##__VA_ARGS__)
+vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *file_name,
+                 const char *function_name, unsigned int line_no, const char *format, ...);
+#define VASQ_ALWAYS(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_ALWAYS, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define VASQ_CRITICAL(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_CRITICAL, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define VASQ_ERROR(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_ERROR, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define VASQ_WARNING(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_WARNING, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define VASQ_INFO(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_INFO, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
+#define VASQ_DEBUG(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_DEBUG, __FILE__, __func__, __LINE__, format, ##__VA_ARGS__)
 
 void
-vasqVRawLog(const char *format, va_list args);
+vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *file_name,
+                  const char *function_name, unsigned int line_no, const char *format, va_list args);
 
 void
-vasqHexDump(const char *file_name, const char *function_name, unsigned int line_no, const char *name,
-            const void *data, size_t size);
-#define VASQ_HEXDUMP(name, data, size) vasqHexDump(__FILE__, __func__, __LINE__, name, data, size)
+vasqRawLog(const vasqLogger *logger, const char *format, ...);
+#define VASQ_RAWLOG(logger, format, ...) vasqRawLog(logger, format, ##__VA_ARGS__)
+
+void
+vasqVRawLog(const vasqLogger *logger, const char *format, va_list args);
+
+void
+vasqHexDump(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+            const char *name, const void *data, size_t size);
+#define VASQ_HEXDUMP(logger, name, data, size) \
+    vasqHexDump(logger, __FILE__, __func__, __LINE__, name, data, size)
 
 void *
-vasqMalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t size);
-#define VASQ_MALLOC(size) vasqMalloc(__FILE__, __func__, __LINE__, size)
-
-void *
-vasqCalloc(const char *file_name, const char *function_name, unsigned int line_no, size_t nmemb,
+vasqMalloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
            size_t size);
-#define VASQ_CALLOC(nmemb, size) vasqCalloc(__FILE__, __func__, __LINE__, nmemb, size)
+#define VASQ_MALLOC(logger, size) vasqMalloc(logger, __FILE__, __func__, __LINE__, size)
 
 void *
-vasqRealloc(const char *file_name, const char *function_name, unsigned int line_no, void *ptr, size_t size);
-#define VASQ_REALLOC(ptr, size) vasqRealloc(__FILE__, __func__, __LINE__, ptr, size)
+vasqCalloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+           size_t nmemb, size_t size);
+#define VASQ_CALLOC(logger, nmemb, size) vasqCalloc(logger, __FILE__, __func__, __LINE__, nmemb, size)
+
+void *
+vasqRealloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+            void *ptr, size_t size);
+#define VASQ_REALLOC(logger, ptr, size) vasqRealloc(logger, __FILE__, __func__, __LINE__, ptr, size)
 
 pid_t
-vasqFork(const char *file_name, const char *function_name, unsigned int line_no);
-#define VASQ_FORK() vasqFork(__FILE__, __func__, __LINE__)
+vasqFork(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no);
+#define VASQ_FORK(logger) vasqFork(logger, __FILE__, __func__, __LINE__)
 
-const char *
-vasqLogLevelName(vasqLogLevel_t level) __attribute__((pure));
+#define VASQ_PCRITICAL(logger, function_name, errnum) \
+    VASQ_CRITICAL(logger, "%s: %s", function_name, strerror(errnum))
+#define VASQ_PERROR(logger, function_name, errnum) \
+    VASQ_ERROR(logger, "%s: %s", function_name, strerror(errnum))
+#define VASQ_PWARNING(logger, function_name, errnum) \
+    VASQ_WARNING(logger, "%s: %s", function_name, strerror(errnum))
 
-#else  // VASQ_ENABLE_LOGGING
-
-#define VASQ_LOG_INIT(level, out, include_file_name) VASQ_RET_OK
-#define VASQ_SET_LOG_LEVEL(level)                    NO_OP
-#define VASQ_ALWAYS(format, ...)                     NO_OP
-#define VASQ_CRITICAL(format, ...)                   NO_OP
-#define VASQ_ERROR(format, ...)                      NO_OP
-#define VASQ_WARNING(format, ...)                    NO_OP
-#define VASQ_INFO(format, ...)                       NO_OP
-#define VASQ_DEBUG(format, ...)                      NO_OP
-#define VASQ_RAWLOG(format, ...)                     NO_OP
-#define VASQ_HEXDUMP(name, data, size)               NO_OP
-#define VASQ_MALLOC(size)                            malloc(size)
-#define VASQ_CALLOC(nmemb, size)                     calloc(nmemb, size)
-#define VASQ_REALLOC(ptr, size)                      realloc(ptr, size)
-#define VASQ_FORK()                                  fork()
-
-#endif  // VASQ_ENABLE_LOGGING
-
-#define VASQ_PCRITICAL(function_name, errnum) VASQ_CRITICAL("%s: %s", function_name, strerror(errnum))
-#define VASQ_PERROR(function_name, errnum)    VASQ_ERROR("%s: %s", function_name, strerror(errnum))
-#define VASQ_PWARNING(function_name, errnum)  VASQ_WARNING("%s: %s", function_name, strerror(errnum))
-
-#endif // VANILLA_SQUAD_LOGGER_H
+#endif  // VANILLA_SQUAD_LOGGER_H

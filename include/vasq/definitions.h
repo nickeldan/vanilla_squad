@@ -25,4 +25,4 @@ enum vasqRetValue {
     VASQ_RET_UNUSED,
 };
 
-#endif // VANILLA_SQUAD_DEFINITIONS_H
+#endif  // VANILLA_SQUAD_DEFINITIONS_H

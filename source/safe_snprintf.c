@@ -4,13 +4,42 @@
 #include "vasq/safe_snprintf.h"
 
 static unsigned int
-numToBuffer(char *buffer, uintmax_t value);
+numToBuffer(char *buffer, uintmax_t value)
+{
+    unsigned int ret;
+
+    for (ret = 0; value > 0; ret++) {
+        *(buffer--) = '0' + value % 10;
+        value /= 10;
+    }
+
+    return ret;
+}
 
 static unsigned int
-numToBufferHex(char *buffer, uintmax_t value, bool capitalize);
+numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
+{
+    unsigned int ret;
+    char hex_letter;
+
+    hex_letter = capitalize ? 'A' : 'a';
+
+    for (ret = 0; value > 0; ret++) {
+        int nibble;
+
+        nibble = value & 0x0f;
+        *(buffer--) = (nibble < 10) ? ('0' + nibble) : (hex_letter + nibble - 10);
+        value = (value >> 4);
+    }
+
+    return ret;
+}
 
 static bool
-safeIsdigit(char c);
+safeIsdigit(char c)
+{
+    return c >= '0' && c <= '9';
+}
 
 ssize_t
 vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
@@ -318,40 +347,29 @@ done:
     return buffer - start;
 }
 
-static unsigned int
-numToBuffer(char *buffer, uintmax_t value)
+ssize_t
+vasqIncSnprintf(char **output, size_t *capacity, const char *format, ...)
 {
-    unsigned int ret;
+    ssize_t ret;
+    va_list args;
 
-    for (ret = 0; value > 0; ret++) {
-        *(buffer--) = '0' + value % 10;
-        value /= 10;
-    }
+    va_start(args, format);
+    ret = vasqIncVsnprintf(output, capacity, format, args);
+    va_end(args);
 
     return ret;
 }
 
-static unsigned int
-numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
+ssize_t
+vasqIncVsnprintf(char **output, size_t *capacity, const char *format, va_list args)
 {
-    unsigned int ret;
-    char hex_letter;
+    ssize_t ret;
 
-    hex_letter = capitalize ? 'A' : 'a';
-
-    for (ret = 0; value > 0; ret++) {
-        int nibble;
-
-        nibble = value & 0x0f;
-        *(buffer--) = (nibble < 10) ? ('0' + nibble) : (hex_letter + nibble - 10);
-        value = (value >> 4);
+    ret = vasqSafeVsnprintf(*output, *capacity, format, args);
+    if (ret > 0) {
+        *output += ret;
+        *capacity -= ret;
     }
 
     return ret;
-}
-
-static bool
-safeIsdigit(char c)
-{
-    return c >= '0' && c <= '9';
 }

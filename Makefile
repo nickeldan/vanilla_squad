@@ -23,6 +23,6 @@ _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 	$(CC) -o $@ $^
 
 tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
-	$(CC) $(CFLAGS) -DVASQ_ENABLE_LOGGING -I$(VASQ_INCLUDE_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
 clean: $(CLEAN_TARGETS)

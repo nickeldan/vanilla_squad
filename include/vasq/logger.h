@@ -2,9 +2,7 @@
 #define VANILLA_SQUAD_LOGGER_H
 
 #include <stdarg.h>
-#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "definitions.h"
 
@@ -29,16 +27,16 @@ typedef void (*vasqLoggerDataProcessor)(void *, char **, size_t *);
     %M : Message string
     %p : PID
     %L : Log level
+    %_ : Log level name padding
     %u : Unix epoch time in seconds
     %t : "Pretty" timestamp
     %h : Hour
     %m : Minute
     %s : Second
     %F : File name
-    %f : Funciton name
+    %f : Function name
     %l : Line number
     %x : User data
-    %_ : Log level name padding
     %% : Literal percent sign
 */
 
@@ -80,7 +78,6 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 
 void
 vasqRawLog(const vasqLogger *logger, const char *format, ...);
-#define VASQ_RAWLOG(logger, format, ...) vasqRawLog(logger, format, ##__VA_ARGS__)
 
 void
 vasqVRawLog(const vasqLogger *logger, const char *format, va_list args);

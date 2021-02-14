@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
@@ -26,11 +28,7 @@ validLogFormat(const char *format)
 
     for (size_t k = 0; format[k]; k++) {
         if (format[k] == '%') {
-            if (!format[++k]) {
-                return false;
-            }
-
-            switch (format[k]) {
+            switch (format[++k]) {
             case 'M':
                 if (++m_occurrences == 2) {
                     return false;
@@ -38,6 +36,7 @@ validLogFormat(const char *format)
             /* FALLTHROUGH */
             case 'p':
             case 'L':
+            case '_':
             case 'u':
             case 't':
             case 'h':
@@ -47,7 +46,6 @@ validLogFormat(const char *format)
             case 'f':
             case 'l':
             case 'x':
-            case '_':
             case '%': break;
 
             default: return false;
@@ -195,6 +193,13 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 
             case 'L': vasqIncSnprintf(&dst, &remaining, "%s", logLevelName(level)); break;
 
+            case '_':
+                padding_length = logLevelNamePadding(level);
+                memset(padding, ' ', padding_length);
+                padding[padding_length] = '\0';
+                vasqIncSnprintf(&dst, &remaining, "%s", padding);
+                break;
+
             case 'u': vasqIncSnprintf(&dst, &remaining, "%li", (long)now); break;
 
             case 't':
@@ -227,13 +232,6 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
                 if (logger->processor) {
                     logger->processor(logger->user_data, &dst, &remaining);
                 }
-                break;
-
-            case '_':
-                padding_length = logLevelNamePadding(level);
-                memset(padding, ' ', padding_length);
-                padding[padding_length] = '\0';
-                vasqIncSnprintf(&dst, &remaining, "%s", padding);
                 break;
 
             case '%': vasqIncSnprintf(&dst, &remaining, "%%"); break;

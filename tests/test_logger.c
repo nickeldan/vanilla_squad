@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "vasq/logger.h"
 
 int
@@ -32,7 +34,7 @@ main()
         "consectetur. Fusce accumsan ante arcu. Mauris euismod arcu sit amet libero porttitor vestibulum. "
         "Sed imperdiet justo nibh, sed viverra erat sagittis et. Mauris vel malesuada odio.";
 
-    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p) (%u) [%L]%_ %F:%f:%l: %M\n", NULL, NULL,
+    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p) (%t) [%L]%_ %F:%f:%l: %M\n", NULL, NULL,
                            &logger);
     if (ret != VASQ_RET_OK) {
         return ret;

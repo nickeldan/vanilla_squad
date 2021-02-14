@@ -96,7 +96,7 @@ int
 vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDataProcessor processor,
                  void *user_data, vasqLogger **logger)
 {
-    if (fd < 0 || !*logger || !format || !validLogFormat(format)) {
+    if (fd < 0 || !logger || !format || !validLogFormat(format)) {
         return VASQ_RET_USAGE;
     }
 
@@ -173,7 +173,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
     time_t now;
     struct tm now_fields;
 
-    if (level > logger->level || logger->level == VASQ_LL_RAWONLY) {
+    if (!logger || level > logger->level || logger->level <= VASQ_LL_RAWONLY) {
         return;
     }
 
@@ -267,6 +267,10 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
     ssize_t written;
     char output[1024];
 
+    if (!logger || logger->level == VASQ_LL_NONE) {
+        return;
+    }
+
     written = vasqSafeVsnprintf(output, sizeof(output), format, args);
 
     if (written > 0 && write(logger->fd, output, written) < 0) {
@@ -283,7 +287,7 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
     char *dst = output;
     size_t actual_dump_size, remaining = sizeof(output);
 
-    if (logger->level < VASQ_LL_DEBUG) {
+    if (!logger || logger->level < VASQ_LL_DEBUG) {
         return;
     }
 

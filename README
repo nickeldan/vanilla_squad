@@ -88,7 +88,7 @@ The format string looks like a printf string and accepts the following % tokens:
 
 vasqLoggerDataProcessor is defined by
 
-    typedef void (*vasqLoggerDataProcessor)(void*, char**, size_t*)
+    typedef void (*vasqLoggerDataProcessor)(void*, char**, size_t*);
 
 When the logger encounters a %x in the format string, it will call the processor (if it isn't NULL) with
 user_data as the first argument.  The second and third arguments will represent the destination and the
@@ -141,5 +141,5 @@ to the variable CLEAN_TARGETS.  This is so that implementing
 
 in your project's Makefile will cause Vanilla Squad to be cleaned up as well.
 
-Finally, make.mk defines the variables VASQ_DYNAMIC_LIBRARY and VASQ_STATIC_LIBRARY which contains the paths
+Finally, make.mk defines the variables VASQ_SHARED_LIBRARY and VASQ_STATIC_LIBRARY which contains the paths
 of the specified libraries.

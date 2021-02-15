@@ -19,7 +19,7 @@ typedef enum vasqLogLevel {
 
 typedef struct vasqLogger vasqLogger;
 
-typedef void (*vasqLoggerDataProcessor)(void *, char **, size_t *);
+typedef void (*vasqLoggerDataProcessor)(void *, vasqLogLevel_t, char **, size_t *);
 
 /*
     Format symbols:

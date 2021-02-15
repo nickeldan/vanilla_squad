@@ -230,7 +230,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 
             case 'x':
                 if (logger->processor) {
-                    logger->processor(logger->user_data, &dst, &remaining);
+                    logger->processor(logger->user_data, level, &dst, &remaining);
                 }
                 break;
 

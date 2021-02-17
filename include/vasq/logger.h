@@ -7,8 +7,7 @@
 #include "definitions.h"
 
 typedef enum vasqLogLevel {
-    VASQ_LL_NONE = -2,
-    VASQ_LL_RAWONLY,
+    VASQ_LL_NONE = -1,
     VASQ_LL_ALWAYS,
     VASQ_LL_CRITICAL,
     VASQ_LL_ERROR,

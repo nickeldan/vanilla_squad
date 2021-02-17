@@ -171,7 +171,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
     time_t now;
     struct tm now_fields;
 
-    if (!logger || level > logger->level || logger->level <= VASQ_LL_RAWONLY) {
+    if (!logger || level > logger->level || logger->level == VASQ_LL_NONE) {
         return;
     }
 

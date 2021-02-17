@@ -45,7 +45,6 @@ The % tokens recognized by these functions are
 The provided logging levels (which are of type vasqLogLevel_t) are
 
     VASQ_LL_NONE
-    VASQ_LL_RAWONLY
     VASQ_LL_ALWAYS
     VASQ_LL_CRITICAL
     VASQ_LL_ERROR
@@ -119,8 +118,8 @@ Here is an example of creation and use of a logger.
     vasqLoggerFree(logger);
 
 You can also write directly to the logger's file descriptor via the vasqRawLog and vasqVRawLog functions.
-If the logger's level is set to VASQ_LL_RAWONLY, then these functions will be the only way to write messages
-with the logger.  If the logger's level is set to VASQ_LL_NONE, then all logging functions, including the raw
+
+If the logger's level is set to VASQ_LL_NONE, then all logging functions, including the raw
 logging functions, will do nothing.  Passing NULL as the logger to the logging functions also results in
 nothing happening (NOT an error).
 

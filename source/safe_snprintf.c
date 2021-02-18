@@ -365,6 +365,10 @@ vasqIncVsnprintf(char **output, size_t *capacity, const char *format, va_list ar
 {
     ssize_t ret;
 
+    if (!output || !capacity) {
+        return -1;
+    }
+
     ret = vasqSafeVsnprintf(*output, *capacity, format, args);
     if (ret > 0) {
         *output += ret;

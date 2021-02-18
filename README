@@ -85,7 +85,7 @@ The format string looks like a printf string and accepts the following % tokens:
 
 vasqLoggerDataProcessor is defined by
 
-    typedef void (*vasqLoggerDataProcessor)(void*, char**, size_t*);
+    typedef void (*vasqLoggerDataProcessor)(void*, vasqLogLevel_t, char**, size_t*);
 
 When the logger encounters a %x in the format string, it will call the processor (if it isn't NULL) with
 user_data as the first argument.  The second and third arguments will represent the destination and the

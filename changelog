@@ -1,0 +1,5 @@
+3.0.0:
+    - Removed VASQ_LL_RAWONLY.
+    - Functions of type vasqLoggerDataProcessor now take the log level as an argument.
+    - Removed the definitions of VASQ_RET_REDIRECT_FAIL and VASQ_RET_FORK.
+    - Added the VASQ_VERSION macro definition.

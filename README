@@ -1,5 +1,5 @@
 Vanilla Squad was written by Daniel Walker.
-Version 2.0.0 was released on February 14, 2021.
+Version 3.0.0 was released on February 17, 2021.
 
 === Overview ===
 
@@ -51,8 +51,6 @@ The provided logging levels (which are of type vasqLogLevel_t) are
     VASQ_LL_WARNING
     VASQ_LL_INFO
     VASQ_LL_DEBUG
-
-All should be self-explanatory except for VASQ_LL_RAWONLY which will be explained later.
 
 A logger handle is created by the vasqLoggerCreate function.  Its signature is
 

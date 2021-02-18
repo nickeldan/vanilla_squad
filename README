@@ -21,6 +21,7 @@ The % tokens recognized by these functions are
 
 %%
 %i
+%d
 %u
 %li
 %lu

@@ -36,7 +36,7 @@ numToBufferHex(char *buffer, uintmax_t value, bool capitalize)
 }
 
 static bool
-safeIsdigit(char c)
+safeIsDigit(char c)
 {
     return c >= '0' && c <= '9';
 }
@@ -64,9 +64,8 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
     }
 
     for (size--; *format && size > 0; format++) {  // The -- is to leave space for the null terminator.
-        char c;
+        char c = *format;
 
-        c = *format;
         if (c == '%') {
             c = *(++format);
             if (c == '\0') {
@@ -77,7 +76,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 size--;
             }
             else if (c == 's') {
-                for (const char *string = va_arg(args, const char *); *string; string++) {
+                for (const char *string = va_arg(args, const char *); *string && size > 0; string++) {
                     *(buffer++) = *string;
                     size--;
                 }
@@ -142,6 +141,10 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 else if (c == 'd' || c == 'i') {
                     if (is_long) {
                         long value;
+
+                        if (c == 'd') {
+                            return -1;
+                        }
 
                         value = va_arg(args, long);
                         if (value < 0) {
@@ -272,9 +275,9 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     value = (uintptr_t)va_arg(args, void *);
                     index -= numToBufferHex(subbuffer + index - 1, value, false);
                 }
-                else if (safeIsdigit(c) || c == 'x' || c == 'X') {
+                else if (safeIsDigit(c) || c == 'x' || c == 'X') {
                     unsigned int value;
-                    int min_length = 0;
+                    int min_length;
                     char padding;
                     bool capitalize;
 
@@ -285,17 +288,17 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     if (c == '0') {
                         padding = '0';
                         c = *(++format);
-                        if (c == '\0') {
-                            return -1;
-                        }
                     }
                     else {
                         padding = ' ';
                     }
 
-                    if (safeIsdigit(c)) {
+                    if (safeIsDigit(c)) {
                         min_length = c - '0';
                         c = *(++format);
+                    }
+                    else {
+                        min_length = 0;
                     }
 
                     if (c == 'x') {

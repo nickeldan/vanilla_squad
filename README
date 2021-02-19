@@ -10,8 +10,8 @@ The Vanilla Squad library provides access to two classes of functions: signal-sa
 vasqSafeSnprintf and vasqSafeVsnprintf are used in the same was as snprintf and vsnprintf, respectively.
 If either the destination or format string are NULL, the format string is invalid, or the size of the
 destination is zero, they return -1.  Otherwise, they return the number of characters actually written to the
-destination (NOT counting the terminator).  If the functions don't return -1, then a terminator is
-guaranteed to be written to the destination.
+destination (NOT counting the terminator).  If a -1 is not returned, then a terminator is guaranteed to be
+written to the destination.
 
 vasqIncSnprintf and vasqIncVsnprintf function similarly except that they take pointers to the destination as
 well as the size of the destination.  Upon success, they adjust the destination and size so that subsequent
@@ -91,13 +91,13 @@ vasqLoggerDataProcessor is defined by
 When the logger encounters a %x in the format string, it will call the processor (if it isn't NULL) with
 user_data as the first argument.  The second and third arguments will represent the destination and the
 remaining size and function as in vasqIncSnprintf.  The processor is responsible for adjusting these two
-values (recall that the teriminator is not included in the calculation).  The processor can write a
+values (recall that the terminator is not included in the calculation).  The processor can write a
 terminator at the end but it is not necessary.
 
 Here is an example of creation and use of a logger.
 
     int ret;
-    const char *gnarly = "gnarly", *cool = "cool";
+    const char *gnarly = "gnarly", *cool = "cool", *invisible = "invisible";
     vasqLogger *logger;
 
     ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", NULL, NULL, &logger);
@@ -106,6 +106,7 @@ Here is an example of creation and use of a logger.
     }
     VASQ_INFO(logger, "This is a %s message", gnarly);
     VASQ_CRITICAL(logger, "This is a %s message", cool);
+    VASQ_DEBUG(logger, "This is an %s message", invisible);
     /*
         Outputs:
 
@@ -123,7 +124,7 @@ logging functions, will do nothing.  Passing NULL as the logger to the logging f
 nothing happening (NOT an error).
 
 There are various other functions provided by include/vasq/logger.h, such as a hex dumper (which prints at
-the DEBUG level) and wrappers around malloc, calloc, realloc, and fork.
+the DEBUG level) and wrappers around malloc, calloc, realloc, fork, and perror.
 
 === Building Vanilla Squad ===
 

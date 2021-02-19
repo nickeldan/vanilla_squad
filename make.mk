@@ -12,8 +12,8 @@ CLEAN_TARGETS += vasq_clean
 $(VASQ_DIR)/deps.mk: $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	rm -f $@
 	for file in $(VASQ_SOURCE_FILES); do \
-	    echo "$(VASQ_DIR)/source/`$(CC) -MM $$file`" >> $@ && \
-	    echo '\t$$(CC) $$(CFLAGS) -fpic -ffunction-sections -c $$< -o $$@' >> $@; \
+	    echo "$(VASQ_DIR)/source/`$(CC) -I$(VASQ_INCLUDE_DIR) -MM $$file`" >> $@ && \
+	    echo '\t$$(CC) $$(CFLAGS) -fpic -ffunction-sections -I$(VASQ_INCLUDE_DIR) -c $$< -o $$@' >> $@; \
 	done
 include $(VASQ_DIR)/deps.mk
 
@@ -24,4 +24,4 @@ $(VASQ_STATIC_LIBRARY): $(VASQ_OBJECT_FILES)
 	ar rcs $@ $^
 
 vasq_clean:
-	rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES) $(VASQ_DIR)/deps.mk
+	rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES)

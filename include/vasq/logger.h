@@ -1,8 +1,11 @@
 #ifndef VANILLA_SQUAD_LOGGER_H
 #define VANILLA_SQUAD_LOGGER_H
 
+#include <errno.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "definitions.h"
 

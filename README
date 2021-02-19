@@ -127,7 +127,7 @@ the DEBUG level) and wrappers around malloc, calloc, realloc, and fork.
 
 === Building Vanilla Squad ===
 
-Dynamic and static libraries are built using make.  Adding "debug=yes" to the make invocation will disable
+Shared and static libraries are built using make.  Adding "debug=yes" to the make invocation will disable
 optimization and build the libraries with debugging symbols.
 
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the

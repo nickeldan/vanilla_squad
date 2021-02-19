@@ -1,10 +1,6 @@
 #ifndef VANILLA_SQUAD_DEFINITIONS_H
 #define VANILLA_SQUAD_DEFINITIONS_H
 
-#include <errno.h>
-#include <stdbool.h>
-#include <sys/types.h>
-
 #define NO_OP ((void)0)
 
 #ifndef MIN

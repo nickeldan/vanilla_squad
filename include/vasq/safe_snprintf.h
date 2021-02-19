@@ -2,6 +2,7 @@
 #define VANILLA_SQUAD_SAFE_SNPRINTF_H
 
 #include <stdarg.h>
+#include <sys/types.h>
 
 #include "definitions.h"
 

@@ -7,9 +7,12 @@ VASQ_OBJECT_FILES := $(patsubst %.c,%.o,$(VASQ_SOURCE_FILES))
 VASQ_HEADER_FILES := $(wildcard $(VASQ_DIR)/include/vasq/*.h)
 VASQ_INCLUDE_DIR := $(VASQ_DIR)/include
 
+VASQ_DEPS_FILE := $(VASQ_DIR)/deps.mk
+DEPS_FILES += $(VASQ_DEPS_FILE)
+
 CLEAN_TARGETS += vasq_clean
 
-$(VASQ_DIR)/deps.mk: $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
+$(VASQ_DEPS_FILE): $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	rm -f $@
 	for file in $(VASQ_SOURCE_FILES); do \
 	    echo "$(VASQ_DIR)/source/`$(CC) -I$(VASQ_INCLUDE_DIR) -MM $$file`" >> $@ && \

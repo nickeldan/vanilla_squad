@@ -1,5 +1,4 @@
 *.o
 *.so
 *.a
-deps.mk
 logger_test

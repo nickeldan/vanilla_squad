@@ -18,7 +18,7 @@ $(VASQ_DEPS_FILE): $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	    echo "$(VASQ_DIR)/source/`$(CC) -I$(VASQ_INCLUDE_DIR) -MM $$file`" >> $@ && \
 	    echo '\t$$(CC) $$(CFLAGS) -fpic -ffunction-sections -I$(VASQ_INCLUDE_DIR) -c $$< -o $$@' >> $@; \
 	done
-include $(VASQ_DIR)/deps.mk
+include $(VASQ_DEPS_FILE)
 
 $(VASQ_SHARED_LIBRARY): $(VASQ_OBJECT_FILES)
 	$(CC) -shared -o $@ $^

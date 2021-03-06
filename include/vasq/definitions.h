@@ -1,7 +1,9 @@
 #ifndef VANILLA_SQUAD_DEFINITIONS_H
 #define VANILLA_SQUAD_DEFINITIONS_H
 
+#ifndef NO_OP
 #define NO_OP ((void)0)
+#endif
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))

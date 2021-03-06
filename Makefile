@@ -5,7 +5,7 @@ CFLAGS := -std=gnu11 -fdiagnostics-color -Wall -Wextra
 ifeq ($(debug),yes)
     CFLAGS += -O0 -g -DDEBUG
 else
-    CFLAGS += -O3 -DNDEBUG
+    CFLAGS += -O2 -DNDEBUG
 endif
 
 TESTS := logger_test

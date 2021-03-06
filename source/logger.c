@@ -168,12 +168,15 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
     char output[1024];
     char *dst = output;
     size_t remaining = sizeof(output);
+    int remote_errno;
     time_t now;
     struct tm now_fields;
 
     if (!logger || level > logger->level || logger->level == VASQ_LL_NONE) {
         return;
     }
+
+    remote_errno = errno;
 
     now = time(NULL);
     gmtime_r(&now, &now_fields);
@@ -247,6 +250,8 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
     if (write(logger->fd, output, dst - output) < 0) {
         NO_OP;
     }
+
+    errno = remote_errno;
 }
 
 void
@@ -262,6 +267,7 @@ vasqRawLog(const vasqLogger *logger, const char *format, ...)
 void
 vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
 {
+    int remote_errno;
     ssize_t written;
     char output[1024];
 
@@ -269,11 +275,15 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
         return;
     }
 
+    remote_errno = errno;
+
     written = vasqSafeVsnprintf(output, sizeof(output), format, args);
 
     if (written > 0 && write(logger->fd, output, written) < 0) {
         NO_OP;
     }
+
+    errno = remote_errno;
 }
 
 void
@@ -283,11 +293,14 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
     const unsigned char *bytes = data;
     char output[5000];
     char *dst = output;
+    int remote_errno;
     size_t actual_dump_size, remaining = sizeof(output);
 
     if (!logger || logger->level < VASQ_LL_DEBUG) {
         return;
     }
+
+    remote_errno = errno;
 
     vasqLogStatement(logger, VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name,
                      size, (size == 1) ? "" : "s");
@@ -310,9 +323,8 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
         vasqIncSnprintf(&dst, &remaining, "    ");
 
         for (unsigned int j = 0; j < line_length; j++) {
-            char c;
+            char c = bytes[k + j];
 
-            c = bytes[k + j];
             vasqIncSnprintf(&dst, &remaining, "%c", safeIsprint(c) ? c : '.');
         }
 
@@ -327,6 +339,8 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
     if (write(logger->fd, output, dst - output) < 0) {
         NO_OP;
     }
+
+    errno = remote_errno;
 }
 
 void *

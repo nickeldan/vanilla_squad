@@ -1,9 +1,13 @@
+4.0.0:
+    - Functions of type vasqLoggerDataProcessor now take a 0-up counter as an argument which represents which
+      %x in the format string is being handled.
+
+3.0.1:
+    - Added some error checking to some of the snprintf functions.
+    - The snprintf functions no longer support %ld.  Its support was unintentional before.
+
 3.0.0:
     - Removed VASQ_LL_RAWONLY.
     - Functions of type vasqLoggerDataProcessor now take the log level as an argument.
     - Removed the definitions of VASQ_RET_REDIRECT_FAIL and VASQ_RET_FORK.
     - Added the VASQ_VERSION macro definition.
-
-3.0.1:
-    - Added some error checking to some of the snprintf functions.
-    - The snprintf functions no longer support %ld.  Its support was unintentional before.

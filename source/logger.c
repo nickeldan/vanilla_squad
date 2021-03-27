@@ -167,7 +167,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 {
     char output[1024];
     char *dst = output;
-    size_t remaining = sizeof(output);
+    size_t remaining = sizeof(output), position = 0;
     int remote_errno;
     time_t now;
     struct tm now_fields;
@@ -233,7 +233,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 
             case 'x':
                 if (logger->processor) {
-                    logger->processor(logger->user_data, level, &dst, &remaining);
+                    logger->processor(logger->user_data, position++, level, &dst, &remaining);
                 }
                 break;
 

@@ -221,9 +221,13 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
                 for (idx = strlen(file_name); idx > 0; idx--) {
                     if (file_name[idx] == '/') {
                         idx++;
-                        break;
+                        goto print_file_name;
                     }
                 }
+                if (file_name[0] == '/') {  // idx equals 0 here.
+                    idx = 1;
+                }
+print_file_name:
                 vasqIncSnprintf(&dst, &remaining, "%s", file_name + idx);
                 break;
 
@@ -233,8 +237,9 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fi
 
             case 'x':
                 if (logger->processor) {
-                    logger->processor(logger->user_data, position++, level, &dst, &remaining);
+                    logger->processor(logger->user_data, position, level, &dst, &remaining);
                 }
+                position++;
                 break;
 
             case '%': vasqIncSnprintf(&dst, &remaining, "%%"); break;

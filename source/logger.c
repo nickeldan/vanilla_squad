@@ -405,7 +405,7 @@ vasqFork(const vasqLogger *logger, const char *file_name, const char *function_n
 
     default:
         vasqLogStatement(logger, VASQ_LL_DEBUG, file_name, function_name, line_no,
-                         "Child process started (PID = %i)", child);
+                         "Child process started (PID = %li)", (long)child);
         break;
     }
 

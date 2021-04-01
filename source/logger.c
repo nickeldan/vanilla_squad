@@ -4,13 +4,12 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "vasq/config.h"
 #include "vasq/logger.h"
 #include "vasq/safe_snprintf.h"
 
-#define MAX_HEXDUMP_SIZE 1024
-#define HEXDUMP_WIDTH    16
-#if MAX_HEXDUMP_SIZE % HEXDUMP_WIDTH != 0
-#error "MAX_HEXDUMP_SIZE must be a multiple of HEXDUMP_WIDTH."
+#if VASQ_HEXDUMP_SIZE % VASQ_HEXDUMP_WIDTH != 0
+#error "VASQ_HEXDUMP_SIZE must be a multiple of VASQ_HEXDUMP_WIDTH."
 #endif
 
 struct vasqLogger {
@@ -165,7 +164,7 @@ void
 vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *file_name,
                   const char *function_name, unsigned int line_no, const char *format, va_list args)
 {
-    char output[1024];
+    char output[VASQ_LOGGING_LENGTH];
     char *dst = output;
     size_t remaining = sizeof(output), position = 0;
     int remote_errno;
@@ -274,7 +273,7 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
 {
     int remote_errno;
     ssize_t written;
-    char output[1024];
+    char output[VASQ_LOGGING_LENGTH];
 
     if (!logger || logger->level == VASQ_LL_NONE) {
         return;
@@ -295,8 +294,12 @@ void
 vasqHexDump(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
             const char *name, const void *data, size_t size)
 {
+#define NUM_HEXDUMP_LINES   (VASQ_HEXDUMP_SIZE / VASQ_HEXDUMP_WIDTH)
+#define HEXDUMP_LINE_LENGTH (VASQ_HEXDUMP_WIDTH * 4 + 10)
+#define HEXDUMP_BUFFER_SIZE (NUM_HEXDUMP_LINES * HEXDUMP_LINE_LENGTH + 250)
+
     const unsigned char *bytes = data;
-    char output[5000];
+    char output[HEXDUMP_BUFFER_SIZE];
     char *dst = output;
     int remote_errno;
     size_t actual_dump_size, remaining = sizeof(output);
@@ -310,18 +313,18 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
     vasqLogStatement(logger, VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name,
                      size, (size == 1) ? "" : "s");
 
-    actual_dump_size = MIN(size, MAX_HEXDUMP_SIZE);
-    for (size_t k = 0; k < actual_dump_size; k += HEXDUMP_WIDTH) {
+    actual_dump_size = MIN(size, VASQ_HEXDUMP_SIZE);
+    for (size_t k = 0; k < actual_dump_size; k += VASQ_HEXDUMP_WIDTH) {
         unsigned int line_length;
 
         vasqIncSnprintf(&dst, &remaining, "\t%04x  ", k);
 
-        line_length = MIN(actual_dump_size - k, HEXDUMP_WIDTH);
+        line_length = MIN(actual_dump_size - k, VASQ_HEXDUMP_WIDTH);
         for (unsigned int j = 0; j < line_length; j++) {
             vasqIncSnprintf(&dst, &remaining, "%02x ", bytes[k + j]);
         }
 
-        for (unsigned int j = line_length; j < HEXDUMP_WIDTH; j++) {
+        for (unsigned int j = line_length; j < VASQ_HEXDUMP_WIDTH; j++) {
             vasqIncSnprintf(&dst, &remaining, "   ");
         }
 

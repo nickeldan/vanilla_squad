@@ -1,3 +1,6 @@
+4.1.0:
+    - Various logging limits are now configurable via config.h.
+
 4.0.0:
     - Functions of type vasqLoggerDataProcessor now take a 0-up counter as an argument which represents which
       %x in the format string is being handled.

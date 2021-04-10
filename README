@@ -7,7 +7,7 @@ The Vanilla Squad library provides access to two classes of functions: signal-sa
 
 === Signal-safe snprintf ===
 
-vasqSafeSnprintf and vasqSafeVsnprintf are used in the same was as snprintf and vsnprintf, respectively.
+vasqSafeSnprintf and vasqSafeVsnprintf are used in the same way as snprintf and vsnprintf, respectively.
 If either the destination or format string are NULL, the format string is invalid, or the size of the
 destination is zero, they return -1.  Otherwise, they return the number of characters actually written to the
 destination (NOT counting the terminator).  If a -1 is not returned, then a terminator is guaranteed to be
@@ -70,8 +70,8 @@ for the values).
 The format string looks like a printf string and accepts the following % tokens:
 
 %M - The log message.  More than one of these in a format string is not allowed.
-%p - Process ID
-%L - Log level
+%p - Process ID.
+%L - Log level.
 %_ - Space padding to be used with %L.  See below for an example of its usage.
 %u - Unix epoch time in seconds.
 %t - Pretty timestamp.  E.g., Sun Feb 14 14:27:19 2021
@@ -125,7 +125,9 @@ logging functions, will do nothing.  Passing NULL as the logger to the logging f
 nothing happening (NOT an error).
 
 There are various other functions provided by include/vasq/logger.h, such as a hex dumper (which prints at
-the DEBUG level) and wrappers around malloc, calloc, realloc, fork, and perror.
+the DEBUG level) and wrappers around malloc, fork, and perror.
+
+Logging messages are emitted in a signal-safe manner.  In addition, logging preserves the value of errno.
 
 === Building Vanilla Squad ===
 
@@ -138,6 +140,8 @@ to the variable CLEAN_TARGETS.  This is so that implementing
 
     clean: $(CLEAN_TARGETS)
         ...
+
+The CLEAN_TARGETS variable should also be added to .PHONY if you're using GNU make.
 
 in your project's Makefile will cause Vanilla Squad to be cleaned up as well.
 

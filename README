@@ -141,9 +141,9 @@ to the variable CLEAN_TARGETS.  This is so that implementing
     clean: $(CLEAN_TARGETS)
         ...
 
-The CLEAN_TARGETS variable should also be added to .PHONY if you're using GNU make.
-
 in your project's Makefile will cause Vanilla Squad to be cleaned up as well.
+
+The CLEAN_TARGETS variable should also be added to .PHONY if you're using GNU make.
 
 Finally, make.mk defines the variables VASQ_SHARED_LIBRARY and VASQ_STATIC_LIBRARY which contain the paths of
 the specified libraries.

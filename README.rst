@@ -65,14 +65,15 @@ A logger handle is created by the **vasqLoggerCreate** function.  Its signature 
 
 .. code-block:: c
 
-    int vasqLoggerCreate(
+    int
+    vasqLoggerCreate(
         int fd, // File descriptor for the output.
         vasqLogLevel_t level, // The maximum log level.
         const char *format, // The format of the logging messages.
         vasqLoggerDataProcessor processor, // Explained in a moment.
         void *user_data, // Explained in a moment.
         vasqLogger **logger, // A pointer to the logger handle to be populated.
-    )
+    );
 
 This function returns **VASQ_RET_OK** when successful and an error code otherwise (see include/vasq/definitions.h
 for the values).
@@ -101,11 +102,11 @@ The format string looks like a **printf** string and accepts the following % tok
     typedef void (*vasqLoggerDataProcessor)(void*, size_t, vasqLogLevel_t, char**, size_t*);
 
 When the logger encounters a **%x** in the format string, it will call the processor (if it isn't **NULL**)
-with user_data as the first argument, an index as the second, and the log level as the third.  The index will
-be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments will
-be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor is
-responsible for adjusting these two values (recall that the terminator is not included in the calculation).
-The processor can write a terminator at the end but it is not necessary.
+with **user_data** as the first argument, an index as the second, and the log level as the third.  The index
+will be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments
+will be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor
+is responsible for adjusting these two values (recall that the terminator is not included in the
+calculation).  The processor can write a terminator at the end but it is not necessary.
 
 Here is an example of creation and use of a logger.
 

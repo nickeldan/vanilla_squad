@@ -24,7 +24,7 @@ $(VASQ_SHARED_LIBRARY): $(VASQ_OBJECT_FILES)
 	$(CC) -shared -o $@ $^
 
 $(VASQ_STATIC_LIBRARY): $(VASQ_OBJECT_FILES)
-	ar rcs $@ $^
+	$(AR) rcs $@ $^
 
 vasq_clean:
 	rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES)

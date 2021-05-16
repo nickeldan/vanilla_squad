@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.0.0 was released on March 27, 2021.
+Version 4.1.0 was released on May 16, 2021.
 
 Overview
 ========
@@ -151,6 +151,9 @@ Building Vanilla Squad
 Shared and static libraries are built using make.  Adding "debug=yes" to the make invocation will disable
 optimization and build the libraries with debugging symbols.
 
+The Makefile contains a phony target, **doc**, which creates a PDF from README.rst.  It requires the
+installation of rst2pdf.
+
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the
 **VASQ_DIR** variable must be set to the location of the Vanilla Squad directory.  make.mk will also add a
 target to the variable **CLEAN_TARGETS**.  This is so that implementing
@@ -164,5 +167,10 @@ in your project's Makefile will cause Vanilla Squad to be cleaned up as well.
 
 The **CLEAN_TARGETS** variable should be added to **.PHONY** if you're using GNU make.
 
-Finally, make.mk defines the variables **VASQ_SHARED_LIBRARY** and **VASQ_STATIC_LIBRARY** which contain the
-paths of the specified libraries.
+make.mk defines the variables **VASQ_SHARED_LIBRARY** and **VASQ_STATIC_LIBRARY** which contain the paths of
+the specified libraries.
+
+Configuration
+-------------
+
+include/vasq/config.h contains various parameters which can be set prior to compilation.  

@@ -1,5 +1,6 @@
 4.1.0:
     - Various logging limits are now configurable via config.h.
+    - Added vasqExit.
 
 4.0.0:
     - Functions of type vasqLoggerDataProcessor now take a 0-up counter as an argument which represents which

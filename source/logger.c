@@ -150,8 +150,7 @@ vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor, vo
 }
 
 void
-vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *file_name,
-                 const char *function_name, unsigned int line_no, const char *format, ...)
+vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format, ...)
 {
     va_list args;
 
@@ -161,8 +160,8 @@ vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *fil
 }
 
 void
-vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, const char *file_name,
-                  const char *function_name, unsigned int line_no, const char *format, va_list args)
+vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format,
+                  va_list args)
 {
     char output[VASQ_LOGGING_LENGTH];
     char *dst = output;
@@ -291,8 +290,7 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
 }
 
 void
-vasqHexDump(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
-            const char *name, const void *data, size_t size)
+vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size)
 {
 #define NUM_HEXDUMP_LINES   (VASQ_HEXDUMP_SIZE / VASQ_HEXDUMP_WIDTH)
 #define HEXDUMP_LINE_LENGTH (VASQ_HEXDUMP_WIDTH * 4 + 10)
@@ -352,8 +350,7 @@ vasqHexDump(const vasqLogger *logger, const char *file_name, const char *functio
 }
 
 void *
-vasqMalloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
-           size_t size)
+vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size)
 {
     void *ptr;
 
@@ -366,8 +363,7 @@ vasqMalloc(const vasqLogger *logger, const char *file_name, const char *function
 }
 
 void *
-vasqCalloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
-           size_t nmemb, size_t size)
+vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size)
 {
     void *ptr;
 
@@ -380,8 +376,7 @@ vasqCalloc(const vasqLogger *logger, const char *file_name, const char *function
 }
 
 void *
-vasqRealloc(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
-            void *ptr, size_t size)
+vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size)
 {
     void *success;
 
@@ -394,7 +389,7 @@ vasqRealloc(const vasqLogger *logger, const char *file_name, const char *functio
 }
 
 pid_t
-vasqFork(const vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no)
+vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL)
 {
     pid_t child;
 
@@ -407,10 +402,19 @@ vasqFork(const vasqLogger *logger, const char *file_name, const char *function_n
     case 0: break;
 
     default:
-        vasqLogStatement(logger, VASQ_LL_DEBUG, file_name, function_name, line_no,
+        vasqLogStatement(logger, VASQ_LL_PROCESS, file_name, function_name, line_no,
                          "Child process started (PID = %li)", (long)child);
         break;
     }
 
     return child;
+}
+
+void
+vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick)
+{
+    vasqLogStatement(logger, VASQ_LL_PROCESS, file_name, function_name, line_no,
+                     "Process exiting with value %i", value);
+    vasqLoggerFree(logger);
+    (quick ? exit : _exit)(value);
 }

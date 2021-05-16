@@ -56,7 +56,5 @@ main()
 
     VASQ_INFO(logger, "Printing 0: %i", 0);
 
-    vasqLoggerFree(logger);
-
-    return 0;
+    VASQ_EXIT(logger, 0);
 }

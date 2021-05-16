@@ -15,7 +15,7 @@ all: _all
 VASQ_DIR := .
 include make.mk
 
-.PHONY: all _all clean $(CLEAN_TARGETS)
+.PHONY: all _all clean doc $(CLEAN_TARGETS)
 
 _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS) README.pdf
 
@@ -24,6 +24,8 @@ _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS) README.pdf
 
 tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
 	$(CC) $(CFLAGS) -I$(VASQ_INCLUDE_DIR) -c $< -o $@
+
+doc: README.pdf
 
 README.pdf: README.rst
 	rst2pdf $< -o $@

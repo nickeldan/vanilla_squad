@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.1.0 was released on May 16, 2021.
+Version 4.2.0 was released on May 24, 2021.
 
 Overview
 ========
@@ -20,9 +20,9 @@ size of the destination is zero, they return -1.  Otherwise, they return the num
 written to the destination (NOT counting the terminator).  If a -1 is not returned, then a terminator is
 guaranteed to be written to the destination.
 
-**vasqIncSnprintf** and **vasqIncVsnprintf** function similarly except that they take pointers to the destination as
-well as the size of the destination.  Upon success, they adjust the destination and size so that subsequent
-calls to these functions will pick up where the previous call left off.
+**vasqIncSnprintf** and **vasqIncVsnprintf** function similarly except that they take pointers to the
+destination as well as the size of the destination.  Upon success, they adjust the destination and size so
+that subsequent calls to these functions will pick up where the previous call left off.
 
 The % tokens recognized by these functions are
 
@@ -53,13 +53,13 @@ Logging
 
 The provided logging levels (which are of type **vasqLogLevel_t**) are
 
-* VASQ_LL_NONE
-* VASQ_LL_ALWAYS
-* VASQ_LL_CRITICAL
-* VASQ_LL_ERROR
-* VASQ_LL_WARNING
-* VASQ_LL_INFO
-* VASQ_LL_DEBUG
+* **VASQ_LL_NONE**
+* **VASQ_LL_ALWAYS**
+* **VASQ_LL_CRITICAL**
+* **VASQ_LL_ERROR**
+* **VASQ_LL_WARNING**
+* **VASQ_LL_INFO**
+* **VASQ_LL_DEBUG**
 
 A logger handle is created by the **vasqLoggerCreate** function.  Its signature is
 
@@ -75,8 +75,11 @@ A logger handle is created by the **vasqLoggerCreate** function.  Its signature 
         vasqLogger **logger, // A pointer to the logger handle to be populated.
     );
 
-This function returns **VASQ_RET_OK** when successful and an error code otherwise (see include/vasq/definitions.h
-for the values).
+This function returns **VASQ_RET_OK** when successful and an error code otherwise (see
+include/vasq/definitions.h for the values).
+
+**vasqLoggerCreate** calls **dup** on the provided file descriptor so that you may call **close** while still
+maintaining logging.  The new descriptor has **FD_CLOEXEC** set on it.
 
 The format string looks like a **printf** string and accepts the following % tokens:
 

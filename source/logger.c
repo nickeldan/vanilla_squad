@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -93,8 +94,14 @@ int
 vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDataProcessor processor,
                  void *user_data, vasqLogger **logger)
 {
-    if (fd < 0 || !logger || !format || !validLogFormat(format)) {
+    int new_fd, flags;
+
+    if (fd < 0 || !logger || !format) {
         return VASQ_RET_USAGE;
+    }
+
+    if (!validLogFormat(format)) {
+        return VASQ_RET_BAD_FORMAT;
     }
 
     *logger = malloc(sizeof(**logger));
@@ -102,11 +109,40 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDat
         return VASQ_RET_OUT_OF_MEMORY;
     }
 
-    (*logger)->fd = fd;
+    while (true) {
+        new_fd = dup(fd);
+        if (new_fd == -1) {
+            int local_errno = errno;
+
+            switch (local_errno) {
+#ifdef EBUSY
+            case EBUSY:
+#endif
+            case EINTR: continue;
+
+            default:
+                fprintf(stderr, "dup: %s", strerror(local_errno));
+                free(*logger);
+                return VASQ_RET_DUP_FAIL;
+            }
+        }
+        else {
+            break;
+        }
+    }
+
+    (*logger)->fd = new_fd;
     (*logger)->level = level;
     (*logger)->format = format;
     (*logger)->processor = processor;
     (*logger)->user_data = user_data;
+
+    flags = fcntl(new_fd, F_GETFD);
+    if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
+        perror("fcntl");
+        vasqLoggerFree(*logger);
+        return VASQ_RET_FCNTL_FAIL;
+    }
 
     return VASQ_RET_OK;
 }
@@ -115,6 +151,7 @@ void
 vasqLoggerFree(vasqLogger *logger)
 {
     if (logger) {
+        close(logger->fd);
         free(logger);
     }
 }

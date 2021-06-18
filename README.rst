@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.2.0 was released on May 24, 2021.
+Version 4.3.0 was released on June 18, 2021.
 
 Overview
 ========
@@ -154,8 +154,8 @@ Building Vanilla Squad
 Shared and static libraries are built using make.  Adding "debug=yes" to the make invocation will disable
 optimization and build the libraries with debugging symbols.
 
-The Makefile contains a phony target, **doc**, which creates a PDF from README.rst.  It requires the
-installation of rst2pdf.
+The Makefile also contains the target README.pdf which is created from README.rst.  The rst2pdf package is
+required.
 
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the
 **VASQ_DIR** variable must be set to the location of the Vanilla Squad directory.  make.mk will also add a

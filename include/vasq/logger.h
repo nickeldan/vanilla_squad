@@ -49,8 +49,14 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDat
 void
 vasqLoggerFree(vasqLogger *logger);
 
+int
+vasqLoggerFd(const vasqLogger *logger);
+
 bool
 vasqSetLoggerFormat(vasqLogger *logger, const char *format);
+
+vasqLogLevel_t
+vasqLogLevel(const vasqLogger *logger);
 
 void
 vasqSetLogLevel(vasqLogger *logger, vasqLogLevel_t level);

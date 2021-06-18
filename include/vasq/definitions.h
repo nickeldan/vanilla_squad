@@ -24,6 +24,6 @@ enum vasqRetValue {
     VASQ_RET_UNUSED,
 };
 
-#define VASQ_VERSION "4.2.0"
+#define VASQ_VERSION "4.3.0"
 
 #endif  // VANILLA_SQUAD_DEFINITIONS_H

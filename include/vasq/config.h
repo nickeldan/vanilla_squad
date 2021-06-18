@@ -22,4 +22,9 @@
 */
 #define VASQ_LL_PROCESS VASQ_LL_DEBUG
 
+/*
+    The log level which displays the setting of a logger's log level.
+*/
+#define VASQ_LL_LEVEL_CHANGE VASQ_LL_DEBUG
+
 #endif  // VANILLA_SQUAD_CONFIG_H

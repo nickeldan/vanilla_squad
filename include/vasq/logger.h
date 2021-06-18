@@ -56,10 +56,17 @@ bool
 vasqSetLoggerFormat(vasqLogger *logger, const char *format);
 
 vasqLogLevel_t
-vasqLogLevel(const vasqLogger *logger);
+vasqLoggerLevel(const vasqLogger *logger);
+
+vasqLogLevel_t
+vasqLogLevel(const vasqLogger *logger) __attribute__((deprecated("Use vasqLoggerLevel.")));
 
 void
-vasqSetLogLevel(vasqLogger *logger, vasqLogLevel_t level);
+vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level);
+
+void
+vasqSetLogLevel(vasqLogger *logger, vasqLogLevel_t level)
+    __attribute__((deprecated("Use vasqSetLoggerLevel.")));
 
 void
 vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor, void *user_data);

@@ -135,7 +135,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, vasqLoggerDat
     (*logger)->format = format;
     (*logger)->processor = processor;
     (*logger)->user_data = user_data;
-    vasqSetLogLevel(*logger, level);
+    vasqSetLoggerLevel(*logger, level);
 
     flags = fcntl(new_fd, F_GETFD);
     if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
@@ -159,7 +159,7 @@ vasqLoggerFree(vasqLogger *logger)
 int
 vasqLoggerFd(const vasqLogger *logger)
 {
-    return logger? logger->fd : -1;
+    return logger ? logger->fd : -1;
 }
 
 bool
@@ -175,18 +175,31 @@ vasqSetLoggerFormat(vasqLogger *logger, const char *format)
 }
 
 vasqLogLevel_t
+vasqLoggerLevel(const vasqLogger *logger)
+{
+    return logger ? logger->level : VASQ_LL_NONE;
+}
+
+vasqLogLevel_t
 vasqLogLevel(const vasqLogger *logger)
 {
-    return logger? logger->level : VASQ_LL_NONE;
+    return vasqLoggerLevel(logger);
+}
+
+void
+vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level)
+{
+    if (logger) {
+        logger->level = level;
+        vasqLogStatement(logger, VASQ_LL_LEVEL_CHANGE, VASQ_CONTEXT_PARAMS, "Log level set to %s",
+                         logLevelName(level));
+    }
 }
 
 void
 vasqSetLogLevel(vasqLogger *logger, vasqLogLevel_t level)
 {
-    if (logger) {
-        logger->level = level;
-        vasqLogStatement(logger, VASQ_LL_LEVEL_CHANGE, VASQ_CONTEXT_PARAMS, "Log level set to %s", logLevelName(level));
-    }
+    vasqSetLoggerLevel(logger, level);
 }
 
 void

@@ -1,3 +1,6 @@
+?.?.?: 
+    - Deprecated vasqLogLevel and vasqSetLogLevel.
+
 4.3.0:
     - Added the functions vasqLoggerFd and vasqLogLevel.
     - Added the VASQ_LL_LEVEL_CHANGE macro in config.h.

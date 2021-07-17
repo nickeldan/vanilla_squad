@@ -4,3 +4,4 @@
 deps.mk
 logger_test
 README.pdf
+.vscode

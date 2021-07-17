@@ -1,3 +1,6 @@
+?.?.?:
+    - PLACEHOLDER() now works with C99.
+
 4.4.0: 
     - Deprecated vasqLogLevel and vasqSetLogLevel.
     - Added placeholder.h.

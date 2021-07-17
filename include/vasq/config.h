@@ -27,4 +27,16 @@
 */
 #define VASQ_LL_LEVEL_CHANGE VASQ_LL_DEBUG
 
+/*
+    Causes the PLACEHOLDER() macro to generate an error when used even if DEBUG or VASQ_ALLOW_PLACEHOLDER are
+    defined.
+*/
+// #define VASQ_REJECT_PLACEHOLDER
+
+/*
+    If other macros are defined such that PLACEHOLDER() would normally resolve to a no op, this macro causes
+    the PLACEHOLDER() macro to generate a warning when used.
+*/
+// #define VASQ_WARN_PLACEHOLDER
+
 #endif  // VANILLA_SQUAD_CONFIG_H

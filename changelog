@@ -1,5 +1,6 @@
-?.?.?: 
+4.4.0: 
     - Deprecated vasqLogLevel and vasqSetLogLevel.
+    - Added placeholder.h.
 
 4.3.0:
     - Added the functions vasqLoggerFd and vasqLogLevel.

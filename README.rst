@@ -4,12 +4,16 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.3.0 was released on June 18, 2021.
+Version 4.4.0 was released on July 16, 2021.
 
 Overview
 ========
 
-The Vanilla Squad library provides access to two classes of functions: signal-safe snprintf and logging.
+The Vanilla Squad library provides access to various utilities:
+
+* Signal-safe snprintf
+* Logging
+* Placeholders
 
 Signal-safe snprintf
 ====================
@@ -147,6 +151,28 @@ There are various other functions provided by include/vasq/logger.h, such as a h
 the DEBUG level) and wrappers around **malloc**, **fork**, and **perror**.
 
 Logging messages are emitted in a signal-safe manner.  In addition, logging preserves the value of **errno**.
+
+Placeholders
+============
+
+placeholder.h defines a single macro: **PLACEHOLDER()**.  If either the **DEBUG** or
+**VASQ_ALLOW_PLACEHOLDER** macros are defined, then **PLACEHOLDER()** will resolve to a no op.  Otherwise,
+it will resolve to a static assertion of 0.  The intended use case is
+
+.. code-block:: c
+
+    int
+    some_function(int arg)
+    {
+        PLACEHOLDER(); // I don't know how to implement this function yet.
+
+        return 0;
+    }
+
+The idea is that, in production, this section of code would fail to compile thus making sure that you don't
+forget to implement the function.
+
+If you're compiling for a C standard earlier than C11, then **PLACEHOLDER()** will resolve to a no op.
 
 Building Vanilla Squad
 ======================

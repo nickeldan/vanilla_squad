@@ -54,7 +54,5 @@ main()
 
     VASQ_HEXDUMP(logger, "Long data", data, sizeof(data));
 
-    VASQ_INFO(logger, "Printing 0: %i", 0);
-
     VASQ_EXIT(logger, 0);
 }

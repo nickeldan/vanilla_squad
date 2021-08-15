@@ -111,6 +111,12 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 *(buffer++) = va_arg(args, int);
                 size--;
             }
+            else if (c == 'n') {
+                int *ptr;
+
+                ptr = va_arg(args, int *);
+                *ptr = buffer - start;
+            }
             else {
                 bool is_long;
                 char subbuffer[39];  // Big enough to hold a 128-bit unsigned integer without the null
@@ -139,13 +145,9 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         index -= numToBuffer(subbuffer + index - 1, value);
                     }
                 }
-                else if (c == 'd' || c == 'i') {
+                else if (c == 'i' || c == 'd') {
                     if (is_long) {
                         long value;
-
-                        if (c == 'd') {
-                            return -1;
-                        }
 
                         value = va_arg(args, long);
                         if (value < 0) {
@@ -175,7 +177,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     // is_long must be true.
 
                     c = *(++format);
-                    if (c == 'i') {
+                    if (c == 'i' || c == 'd') {
                         long long value;
 
                         value = va_arg(args, long long);

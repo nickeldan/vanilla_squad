@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.4.0 was released on July 16, 2021.
+Version 4.5.0 was released on August 15, 2021.
 
 Overview
 ========
@@ -35,8 +35,10 @@ The % tokens recognized by these functions are
 * %d
 * %u
 * %li
+* %ld
 * %lu
 * %lli
+* %lld
 * %llu
 * %zu
 * %zi
@@ -44,6 +46,7 @@ The % tokens recognized by these functions are
 * %ji
 * %p
 * %s
+* %n
 * %.*s
 * %x
 * %X

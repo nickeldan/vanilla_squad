@@ -1,14 +1,14 @@
 CC ?= gcc
 debug ?= no
 
-CFLAGS := -std=gnu11 -fdiagnostics-color -Wall -Wextra
+CFLAGS := -std=gnu99 -fdiagnostics-color -Wall -Wextra
 ifeq ($(debug),yes)
     CFLAGS += -O0 -g -DDEBUG
 else
     CFLAGS += -O2 -DNDEBUG
 endif
 
-TESTS := logger_test
+TESTS := logger_test snprintf_test
 
 all: _all
 

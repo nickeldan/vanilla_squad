@@ -160,7 +160,7 @@ Placeholders
 
 placeholder.h defines a single macro: **PLACEHOLDER()**.  If either the **DEBUG** or
 **VASQ_ALLOW_PLACEHOLDER** macros are defined, then **PLACEHOLDER()** will resolve to a no op.  Otherwise,
-it will resolve to a static assertion of 0.  The intended use case is
+it will resolve to a compiler error.  The intended use case is
 
 .. code-block:: c
 
@@ -175,7 +175,7 @@ it will resolve to a static assertion of 0.  The intended use case is
 The idea is that, in production, this section of code would fail to compile thus making sure that you don't
 forget to implement the function.
 
-If you're compiling for a C standard earlier than C11, then **PLACEHOLDER()** will resolve to a no op.
+If you're compiling for a C standard earlier than C99, then **PLACEHOLDER()** will resolve to a no op.
 
 Building Vanilla Squad
 ======================

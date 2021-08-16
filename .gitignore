@@ -3,5 +3,6 @@
 *.a
 deps.mk
 logger_test
+snprintf_test
 README.pdf
 .vscode

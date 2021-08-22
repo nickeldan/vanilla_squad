@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 4.5.0 was released on August 15, 2021.
+Version 5.0.0 was released on XXX.
 
 Overview
 ========
@@ -77,6 +77,7 @@ A logger handle is created by the **vasqLoggerCreate** function.  Its signature 
         int fd, // File descriptor for the output.
         vasqLogLevel_t level, // The maximum log level.
         const char *format, // The format of the logging messages.
+        unsigned int options, // Various options bit-ORed together.
         vasqLoggerDataProcessor processor, // Explained in a moment.
         void *user_data, // Explained in a moment.
         vasqLogger **logger, // A pointer to the logger handle to be populated.
@@ -85,25 +86,28 @@ A logger handle is created by the **vasqLoggerCreate** function.  Its signature 
 This function returns **VASQ_RET_OK** when successful and an error code otherwise (see
 include/vasq/definitions.h for the values).
 
-**vasqLoggerCreate** calls **dup** on the provided file descriptor so that you may call **close** while still
-maintaining logging.  The new descriptor has **FD_CLOEXEC** set on it.
+So far, there are two flags that can be passed in via the **options** argument:
+
+* **VASQ_LOGGER_OPT_DUP**: Instead of using the provided file descriptor, this option causes **dup** to be called.  The new descriptor is closed when the logger is freed.
+* **VASQ_LOGGER_OPT_CLOEXEC**: This option causes the **FD_CLOEXEC** flag to be set on the file descriptor.
 
 The format string looks like a **printf** string and accepts the following % tokens:
 
-* %M - The log message.  More than one of these in a format string is not allowed.
-* %p - Process ID.
-* %L - Log level.
-* %_ - Space padding to be used with %L.  See below for an example of its usage.
-* %u - Unix epoch time in seconds.
-* %t - Pretty timestamp.  E.g., Sun Feb 14 14:27:19 2021
-* %h - Hour as an integer.
-* %m - Minute as an integer.
-* %s - Second as an integer.
-* %F - File name.
-* %f - Function name.
-* %l - Line number.
-* %x - User data.  See below.
-* %% - Literal %.
+* %M: The log message.  More than one of these in a format string is not allowed.
+* %p: Process ID.
+* %T: Thread ID.
+* %L: Log level.
+* %_: Space padding that can be used with %L.  See below for an example of its usage.
+* %u: Unix epoch time in seconds.
+* %t: Pretty timestamp.  E.g., Sun Feb 14 14:27:19 2021
+* %h: Hour as an integer.
+* %m: Minute as an integer.
+* %s: Second as an integer.
+* %F: File name.
+* %f: Function name.
+* %l: Line number.
+* %x: User data.  See below.
+* %%: Literal %.
 
 **vasqLoggerDataProcessor** is defined by
 
@@ -126,7 +130,7 @@ Here is an example of creation and use of a logger.
     const char *gnarly = "gnarly", *cool = "cool", *invisible = "invisible";
     vasqLogger *logger;
 
-    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", NULL, NULL, &logger);
+    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", 0, NULL, NULL, &logger);
     if ( ret != VASQ_RET_OK ) {
         // handle the error
     }

@@ -1,6 +1,8 @@
 #ifndef VANILLA_SQUAD_DEFINITIONS_H
 #define VANILLA_SQUAD_DEFINITIONS_H
 
+#define VASQ_VERSION "5.0.0"
+
 #ifndef NO_OP
 #define NO_OP ((void)0)
 #endif
@@ -11,6 +13,10 @@
 
 #ifndef MAX
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef ARRAY_LENGTH
+#define ARRAY_LENGTH(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
 enum vasqRetValue {
@@ -24,6 +30,7 @@ enum vasqRetValue {
     VASQ_RET_UNUSED,
 };
 
-#define VASQ_VERSION "5.0.0"
+const char *
+vasqErrorString(int errnum) __attribute__((pure));
 
 #endif  // VANILLA_SQUAD_DEFINITIONS_H

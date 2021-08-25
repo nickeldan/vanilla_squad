@@ -1,3 +1,8 @@
+/**
+ * @file placeholder.h
+ * @author Daniel Walker
+ * @brief Defines the PLACEHOLDER macro.
+ */
 #ifndef VANILLA_SQUAD_PLACEHOLDER_H
 #define VANILLA_SQUAD_PLACEHOLDER_H
 

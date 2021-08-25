@@ -1,3 +1,8 @@
+5.0.0:
+    - Added the options argument to vasqLoggerCreate.
+    - Removed vasqLogLevel and vasqSetLogLevel.
+    - Added vasqErrorString.
+
 4.5.0:
     - PLACEHOLDER() now works with C99.
     - The snprintf functions now support %n, %ld, and %lld.

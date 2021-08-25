@@ -1,6 +1,7 @@
+#include <stdio.h>
 #include <unistd.h>
 
-#include "vasq/logger.h"
+#include <vasq/logger.h>
 
 int
 main()
@@ -37,6 +38,7 @@ main()
     ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p:%T) (%t) [%L]%_ %F:%f:%l: %M\n",
                            VASQ_LOGGER_OPT_DUP | VASQ_LOGGER_OPT_CLOEXEC, NULL, NULL, &logger);
     if (ret != VASQ_RET_OK) {
+        fprintf(stderr, "vasqLoggerCreate failed: %s\n", vasqErrorString(ret));
         return ret;
     }
 

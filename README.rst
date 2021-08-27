@@ -104,8 +104,8 @@ If **options** is **NULL** for **vasqLoggerCreate**, then the default options wi
         typedef void (*vasqLoggerDataProcessor)(void*, size_t, vasqLogLevel_t, char**, size_t*);
     
 When the logger encounters a **%x** in the format string, it will call the processor (if it isn't **NULL**)
-with **user_data** as the first argument, an index as the second, and the log level as the third.  The index
-will be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments
+with **user** as the first argument, an index as the second, and the log level as the third.  The index will
+ be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments
 will be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor
 is responsible for adjusting these two values (recall that the terminator is not included in the
 calculation).  The processor can write a terminator at the end but it is not necessary.

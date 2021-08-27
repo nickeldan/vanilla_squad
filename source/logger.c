@@ -17,7 +17,7 @@
 struct vasqLogger {
     const char *format;
     vasqLoggerDataProcessor processor;
-    void *user_data;
+    void *user;
     int fd;
     vasqLogLevel_t level;
     unsigned int duped : 1;
@@ -99,10 +99,12 @@ logLevelNamePadding(vasqLogLevel_t level)
 }
 
 int
-vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, unsigned int options,
-                 vasqLoggerDataProcessor processor, void *user_data, vasqLogger **logger)
+vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLoggerOptions *options,
+                 vasqLogger **logger)
 {
     int new_fd;
+    const vasqLoggerOptions default_options = {0};
+    const vasqLoggerOptions *use_these_opts = options ? options : &default_options;
 
     if (fd < 0 || !logger) {
         return VASQ_RET_USAGE;
@@ -117,7 +119,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, unsigned int 
         return VASQ_RET_OUT_OF_MEMORY;
     }
 
-    if (options & VASQ_LOGGER_OPT_DUP) {
+    if (use_these_opts->flags & VASQ_LOGGER_FLAG_DUP) {
         while (true) {
             new_fd = dup(fd);
             if (new_fd == -1) {
@@ -149,11 +151,11 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, unsigned int 
 
     (*logger)->fd = new_fd;
     (*logger)->format = format;
-    (*logger)->processor = processor;
-    (*logger)->user_data = user_data;
+    (*logger)->processor = use_these_opts->processor;
+    (*logger)->user = use_these_opts->user;
     vasqSetLoggerLevel(*logger, level);
 
-    if (options & VASQ_LOGGER_OPT_CLOEXEC) {
+    if (use_these_opts->flags & VASQ_LOGGER_FLAG_CLOEXEC) {
         int flags;
 
         flags = fcntl(new_fd, F_GETFD);
@@ -221,16 +223,16 @@ vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor)
 }
 
 void *
-vasqLoggerUseData(const vasqLogger *logger)
+vasqLoggerUserData(const vasqLogger *logger)
 {
-    return logger ? logger->user_data : NULL;
+    return logger ? logger->user : NULL;
 }
 
 void
-vasqSetLoggerUserData(vasqLogger *logger, void *user_data)
+vasqSetLoggerUserData(vasqLogger *logger, void *user)
 {
     if (logger) {
-        logger->user_data = user_data;
+        logger->user = user;
     }
 }
 
@@ -323,7 +325,7 @@ print_file_name:
 
             case 'x':
                 if (logger->processor) {
-                    logger->processor(logger->user_data, position, level, &dst, &remaining);
+                    logger->processor(logger->user, position, level, &dst, &remaining);
                 }
                 position++;
                 break;

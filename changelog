@@ -1,6 +1,7 @@
 5.0.0:
-    - Added the options argument to vasqLoggerCreate.
+    - vasqLoggerCreate now takes a vasqLoggerOptions pointer.
     - Removed vasqLogLevel and vasqSetLogLevel.
+    - Fixed a typo by renaming vasqLoggerUseData to vasqLoggerUserData.
     - Added vasqErrorString.
 
 4.5.0:

@@ -29,8 +29,6 @@ typedef enum vasqLogLevel {
 
 typedef struct vasqLogger vasqLogger;
 
-typedef void (*vasqLoggerDataProcessor)(void *, size_t, vasqLogLevel_t, char **, size_t *);
-
 /*
     Format symbols:
 
@@ -52,14 +50,31 @@ typedef void (*vasqLoggerDataProcessor)(void *, size_t, vasqLogLevel_t, char **,
 */
 
 /**
- * @brief Cause the provided file descriptor to be duplicated (and closed when the logger is freed).
+ * @brief Function type for processing the %x logger format token.
+ *
+ * @param user User-provided data.
+ * @param idx A 0-up counter of which %x in the format string is being processed.
+ * @param level The level of the message.
+ * @param dst A pointer to the destination pointer as used in vasqIncSnprintf (see safe_snprintf.h).
+ * @param remaining A pointer to the remaining number of characters in the destination buffer as used in
+ * vasqIncSnprintf (see safe_snprintf.h).
  */
-#define VASQ_LOGGER_OPT_DUP 0x00000001
+typedef void (*vasqLoggerDataProcessor)(void *user, size_t idx, vasqLogLevel_t level, char **dst,
+                                        size_t *remaining);
 
 /**
- * @brief Set FD_CLOEXEC on the file descriptor.
+ * @brief Options passed to vasqLoggerCreate.
  */
-#define VASQ_LOGGER_OPT_CLOEXEC 0x00000002
+typedef struct vasqLoggerOptions {
+    vasqLoggerDataProcessor processor;  /// The processor to be used for %x format tokens.
+    void *user;                         /// A pointer to user data to be passed to the processor.
+    unsigned int flags;                 /// Bitwise-or-combined flags.
+} vasqLoggerOptions;
+
+#define VASQ_LOGGER_FLAG_DUP \
+    0x00000001  /// Cause the provided file descriptor to be duplicated (and closed when the logger is
+                /// freed).
+#define VASQ_LOGGER_FLAG_CLOEXEC 0x00000002  /// Set FD_CLOEXEC on the file descriptor.
 
 /**
  * @brief Allocate and initialize a logger.
@@ -67,21 +82,19 @@ typedef void (*vasqLoggerDataProcessor)(void *, size_t, vasqLogLevel_t, char **,
  * @param fd The descriptor of the file to where log messages will be written.
  * @param level The maximum log level that this logger will handle.
  * @param format The format string for the log messages.
- * @param options Bitwise inclusive-or of any flags to be used for logger initialization.
- * @param processor If not NULL, the function to be called when encountering a %x in the format string.
- * @param user_data The pointer to be passed to the processor function.
+ * @param options A pointer to an options structure.  If options is NULL, then default options are used.
  * @param logger A pointer to the logger handle to be allocated.
  *
  * @return VASQ_RET_OK upon success and an error value otherwise.
  */
 int
-vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, unsigned int options,
-                 vasqLoggerDataProcessor processor, void *user_data, vasqLogger **logger);
+vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLoggerOptions *options,
+                 vasqLogger **logger);
 
 /**
  * @brief Free a logger.
  *
- * If the VASQ_LOGGER_OPT_DUP flag was used to create the logger, then the file descriptor will be closed.
+ * If the VASQ_LOGGER_FLAG_DUP flag was used to create the logger, then the file descriptor will be closed.
  *
  * @param logger The logger handle to be freed.  This function does nothing if logger is NULL.
  */
@@ -145,7 +158,7 @@ vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor);
  * @return The logger's user data.
  */
 void *
-vasqLoggerUseData(const vasqLogger *logger);
+vasqLoggerUserData(const vasqLogger *logger);
 
 /**
  * @brief Set the user data for a logger.
@@ -154,7 +167,7 @@ vasqLoggerUseData(const vasqLogger *logger);
  * @param user_data The user data.
  */
 void
-vasqSetLoggerUserData(vasqLogger *logger, void *user_data);
+vasqSetLoggerUserData(vasqLogger *logger, void *user);
 
 #define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
 #define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__

@@ -8,6 +8,7 @@ main()
 {
     int ret;
     vasqLogger *logger;
+    vasqLoggerOptions options = {.flags = VASQ_LOGGER_FLAG_DUP | VASQ_LOGGER_FLAG_CLOEXEC};
     unsigned char short_data[10];
     const char data[] =
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non tellus vel turpis mattis porta "
@@ -36,7 +37,7 @@ main()
         "Sed imperdiet justo nibh, sed viverra erat sagittis et. Mauris vel malesuada odio.";
 
     ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p:%T) (%t) [%L]%_ %F:%f:%l: %M\n",
-                           VASQ_LOGGER_OPT_DUP | VASQ_LOGGER_OPT_CLOEXEC, NULL, NULL, &logger);
+                           &options, &logger);
     if (ret != VASQ_RET_OK) {
         fprintf(stderr, "vasqLoggerCreate failed: %s\n", vasqErrorString(ret));
         return ret;

@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 5.0.0 was released on August 24, 2021.
+Version 5.0.0 was released on August 27, 2021.
 
 Overview
 ========
@@ -77,19 +77,43 @@ A logger handle is created by the **vasqLoggerCreate** function.  Its signature 
         int fd, // File descriptor for the output.
         vasqLogLevel_t level, // The maximum log level.
         const char *format, // The format of the logging messages.
-        unsigned int options, // Various options bit-ORed together.
-        vasqLoggerDataProcessor processor, // Explained in a moment.
-        void *user_data, // Explained in a moment.
+        const vasqLoggerOptions *options; // Structure containing various options.
         vasqLogger **logger, // A pointer to the logger handle to be populated.
     );
 
 This function returns **VASQ_RET_OK** when successful and an error code otherwise (see
 include/vasq/definitions.h for the values).
 
-So far, there are two flags that can be passed in via the **options** argument:
+**vasqLoggerOptions** is defined by
 
-* **VASQ_LOGGER_OPT_DUP**: Instead of using the provided file descriptor, this option causes **dup** to be called.  The new descriptor is closed when the logger is freed.
-* **VASQ_LOGGER_OPT_CLOEXEC**: This option causes the **FD_CLOEXEC** flag to be set on the file descriptor.
+.. code-block:: c
+
+    typedef struct vasqLoggerOptions {
+        vasqLoggerDataProcessor processor; /// The processor to be used for %x format tokens.
+        void *user; /// A pointer to user data to be passed to the processor.
+        unsigned int flags; /// Bitwise-or-combined flags.
+    } vasqLoggerOptions;
+
+If **options** is **NULL** for **vasqLoggerCreate**, then the default options will be used.  That is,
+**processor** and **user** will be **NULL** and **flags** will be 0.
+
+**vasqLoggerDataProcessor** is defined by
+
+    .. code-block:: c
+    
+        typedef void (*vasqLoggerDataProcessor)(void*, size_t, vasqLogLevel_t, char**, size_t*);
+    
+When the logger encounters a **%x** in the format string, it will call the processor (if it isn't **NULL**)
+with **user_data** as the first argument, an index as the second, and the log level as the third.  The index
+will be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments
+will be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor
+is responsible for adjusting these two values (recall that the terminator is not included in the
+calculation).  The processor can write a terminator at the end but it is not necessary.
+
+So far, there are two flags that can be passed in via **flags**:
+
+* **VASQ_LOGGER_FLAG_DUP**: Instead of using the provided file descriptor, this option causes **dup** to be called.  The new descriptor is closed when the logger is freed.
+* **VASQ_LOGGER_FLAG_CLOEXEC**: This option causes the **FD_CLOEXEC** flag to be set on the file descriptor.
 
 The format string looks like a **printf** string and accepts the following % tokens:
 
@@ -109,19 +133,6 @@ The format string looks like a **printf** string and accepts the following % tok
 * %x: User data.  See below.
 * %%: Literal %.
 
-**vasqLoggerDataProcessor** is defined by
-
-.. code-block:: c
-
-    typedef void (*vasqLoggerDataProcessor)(void*, size_t, vasqLogLevel_t, char**, size_t*);
-
-When the logger encounters a **%x** in the format string, it will call the processor (if it isn't **NULL**)
-with **user_data** as the first argument, an index as the second, and the log level as the third.  The index
-will be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments
-will be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor
-is responsible for adjusting these two values (recall that the terminator is not included in the
-calculation).  The processor can write a terminator at the end but it is not necessary.
-
 Here is an example of creation and use of a logger.
 
 .. code-block:: c
@@ -130,7 +141,7 @@ Here is an example of creation and use of a logger.
     const char *gnarly = "gnarly", *cool = "cool", *invisible = "invisible";
     vasqLogger *logger;
 
-    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", 0, NULL, NULL, &logger);
+    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", NULL, &logger);
     if ( ret != VASQ_RET_OK ) {
         // handle the error
     }

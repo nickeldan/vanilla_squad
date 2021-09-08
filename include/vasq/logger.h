@@ -151,7 +151,7 @@ void
 vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor);
 
 /**
- * Return a logger's user data.
+ * @brief Return a logger's user data.
  *
  * @param logger The logger handle.
  *

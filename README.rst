@@ -130,7 +130,7 @@ The format string looks like a **printf** string and accepts the following % tok
 * %F: File name.
 * %f: Function name.
 * %l: Line number.
-* %x: User data.  See below.
+* %x: User data.
 * %%: Literal %.
 
 Here is an example of creation and use of a logger.
@@ -143,7 +143,8 @@ Here is an example of creation and use of a logger.
 
     ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_INFO, "[%L]%_ %M ...\n", NULL, &logger);
     if ( ret != VASQ_RET_OK ) {
-        // handle the error
+        fprintf(stderr, "vasqLoggerCreate failed: %s\n", vasqErrorString(ret));
+        // abort
     }
     VASQ_INFO(logger, "This is a %s message", gnarly);
     VASQ_CRITICAL(logger, "This is a %s message", cool);

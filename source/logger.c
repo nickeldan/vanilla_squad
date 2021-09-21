@@ -1,5 +1,4 @@
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
@@ -131,10 +130,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
 #endif
                 case EINTR: continue;
 
-                default:
-                    fprintf(stderr, "dup: %s", strerror(local_errno));
-                    free(*logger);
-                    return VASQ_RET_DUP_FAIL;
+                default: free(*logger); return VASQ_RET_DUP_FAIL;
                 }
             }
             else {
@@ -160,7 +156,6 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
 
         flags = fcntl(new_fd, F_GETFD);
         if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
-            perror("fcntl");
             vasqLoggerFree(*logger);
             return VASQ_RET_FCNTL_FAIL;
         }

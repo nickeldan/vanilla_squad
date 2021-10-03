@@ -8,7 +8,7 @@ else
     CFLAGS += -O2 -DNDEBUG
 endif
 
-TESTS := logger_test snprintf_test
+TESTS := logger_test snprintf_test assert_test
 
 all: _all
 

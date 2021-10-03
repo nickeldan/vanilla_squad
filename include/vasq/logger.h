@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -377,6 +378,42 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
  * quick to true.
  */
 #define VASQ_QUICK_EXIT(logger, value) vasqExit(logger, VASQ_CONTEXT_PARAMS, value, true)
+
+#ifdef DEBUG
+
+#ifdef VASQ_TEST_ASSERT
+
+extern bool _vasq_abort_caught;
+#define _VASQ_ABORT()              \
+    do {                           \
+        _vasq_abort_caught = true; \
+    } while (0)
+#define _VASQ_CLEAR_ABORT()         \
+    do {                            \
+        _vasq_abort_caught = false; \
+    } while (0)
+
+#else  // VASQ_TEST_ABORT
+
+#define _VASQ_ABORT()       abort()
+#define _VASQ_CLEAR_ABORT() NO_OP
+
+#endif  // VASQ_TEST_ABORT
+
+#define VASQ_ASSERT(logger, expr)                              \
+    do {                                                       \
+        _VASQ_CLEAR_ABORT();                                   \
+        if (!(expr)) {                                         \
+            VASQ_CRITICAL(logger, "Assertion failed: " #expr); \
+            _VASQ_ABORT();                                     \
+        }                                                      \
+    } while (0)
+
+#else  // DEBUG
+
+#define VASQ_ASSERT(logger, expr) NO_OP
+
+#endif  // DEBUG
 
 /**
  * @brief Logging equivalent of the perror function at the CRITICAL level.

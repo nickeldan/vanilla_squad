@@ -36,8 +36,8 @@ main()
         "consectetur. Fusce accumsan ante arcu. Mauris euismod arcu sit amet libero porttitor vestibulum. "
         "Sed imperdiet justo nibh, sed viverra erat sagittis et. Mauris vel malesuada odio.";
 
-    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p:%T) (%t) [%L]%_ %F:%f:%l: %M\n",
-                           &options, &logger);
+    ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, "(%p:%T) (%t) [%L]%_ %F:%f:%l: %M\n", &options,
+                           &logger);
     if (ret != VASQ_RET_OK) {
         fprintf(stderr, "vasqLoggerCreate failed: %s\n", vasqErrorString(ret));
         return ret;

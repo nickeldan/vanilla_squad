@@ -1,4 +1,4 @@
-?.?.?:
+5.1.0:
     - Remove some writes to stderr which occurred when vasqLoggerCreate failed.
     - Added the VASQ_ASSERT macro.
 

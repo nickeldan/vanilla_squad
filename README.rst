@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 5.0.0 was released on August 27, 2021.
+Version 5.1.0 was released on October 3, 2021.
 
 Overview
 ========

@@ -4,7 +4,7 @@ Vanilla Squad
 
 :Author: Daniel Walker
 
-Version 5.1.0 was released on October 3, 2021.
+Version 5.1.1 was released on October 8, 2021.
 
 Overview
 ========
@@ -175,8 +175,9 @@ Placeholders
 ============
 
 placeholder.h defines a single macro: **PLACEHOLDER()**.  If either the **DEBUG** or
-**VASQ_ALLOW_PLACEHOLDER** macros are defined, then **PLACEHOLDER()** will resolve to a no op.  Otherwise,
-it will resolve to a compiler error.  The intended use case is
+**VASQ_ALLOW_PLACEHOLDER** macros are defined and **VASQ_REJECT_PLACEHOLDER** is not defined, then
+**PLACEHOLDER()** will resolve to a no op.  Otherwise, it will resolve to a compiler error.  The intended use
+case is
 
 .. code-block:: c
 

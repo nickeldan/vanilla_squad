@@ -6,38 +6,24 @@
 #ifndef VANILLA_SQUAD_PLACEHOLDER_H
 #define VANILLA_SQUAD_PLACEHOLDER_H
 
-#include <features.h>
-
 #include "config.h"
 #include "definitions.h"
 
 #ifdef __USE_ISOC99
 
-#if (defined(DEBUG) || defined(VASQ_ALLOW_PLACEHOLDER)) && !defined(VASQ_REJECT_PLACEHOLDER)
-
-#ifdef VASQ_WARN_PLACEHOLDER
-
-#ifdef VASQ_REJECT_PLACEHOLDER
-#warning "VASQ_WARN_PLACEHOLDER and VASQ_REJECT_PLACEHOLDER are both defined."
-#endif
-
-#define PLACEHOLDER() _Pragma("GCC warning \"Placeholder code left in project.\"")
-
-#else  // VASQ_WARN_PLACEHOLDER
-
-#define PLACEHOLDER() NO_OP
-
-#endif  // VASQ_WARN_PLACEHOLDER
-
-#else  // (defined(DEBUG) || defined(VASQ_ALLOW_PLACEHOLDER)) && !defined(VASQ_REJECT_PLACEHOLDER)
-
-#ifdef VASQ_ALLOW_PLACEHOLDER
-#warning "VASQ_ALLOW_PLACEHOLDER and VASQ_REJECT_PLACEHOLDER are both defined."
-#endif
+#if defined(VASQ_REJECT_PLACEHOLDER) || (!defined(DEBUG) && !defined(VASQ_ALLOW_PLACEHOLDER))
 
 #define PLACEHOLDER() _Pragma("GCC error \"Placeholder code left in project.\"")
 
-#endif  // (defined(DEBUG) || defined(VASQ_ALLOW_PLACEHOLDER)) && !defined(VASQ_REJECT_PLACEHOLDER)
+#elif defined(VASQ_WARN_PLACEHOLDER)
+
+#define PLACEHOLDER() _Pragma("GCC warning \"Placeholder code left in project.\"")
+
+#else
+
+#define PLACEHOLDER() NO_OP
+
+#endif
 
 #else  // __USE_ISOC99
 

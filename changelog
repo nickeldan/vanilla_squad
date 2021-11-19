@@ -1,5 +1,6 @@
 5.1.2:
     - PLACEHOLDER() now works as long as the C standard version is at least C99.
+    - Fixed a potential format string injection vulnerability in VASQ_ASSERT.
 
 5.1.1:
     - The PLACEHOLDER() macro no longer depends upon features.h.

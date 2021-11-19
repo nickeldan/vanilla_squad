@@ -400,13 +400,13 @@ extern bool _vasq_abort_caught;
 
 #endif  // VASQ_TEST_ABORT
 
-#define VASQ_ASSERT(logger, expr)                              \
-    do {                                                       \
-        _VASQ_CLEAR_ABORT();                                   \
-        if (!(expr)) {                                         \
-            VASQ_CRITICAL(logger, "Assertion failed: " #expr); \
-            _VASQ_ABORT();                                     \
-        }                                                      \
+#define VASQ_ASSERT(logger, expr)                                 \
+    do {                                                          \
+        _VASQ_CLEAR_ABORT();                                      \
+        if (!(expr)) {                                            \
+            VASQ_CRITICAL(logger, "Assertion failed: %s", #expr); \
+            _VASQ_ABORT();                                        \
+        }                                                         \
     } while (0)
 
 #else  // DEBUG

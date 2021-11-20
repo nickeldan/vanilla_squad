@@ -25,8 +25,5 @@ _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
 tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
 	$(CC) $(CFLAGS) -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
-README.pdf: README.rst
-	rst2pdf $< -o $@
-
 clean: $(CLEAN_TARGETS)
-	rm -f $(TESTS) $(DEPS_FILES) README.pdf
+	@rm -f $(TESTS) $(DEPS_FILES) README.pdf

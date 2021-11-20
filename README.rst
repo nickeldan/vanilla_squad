@@ -200,9 +200,6 @@ Building Vanilla Squad
 Shared and static libraries are built using make.  Adding "debug=yes" to the make invocation will disable
 optimization and build the libraries with debugging symbols.
 
-The Makefile also contains the target README.pdf which is created from README.rst.  The rst2pdf package is
-required.
-
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the
 **VASQ_DIR** variable must be set to the location of the Vanilla Squad directory.  make.mk will also add a
 target to the variable **CLEAN_TARGETS**.  This is so that implementing

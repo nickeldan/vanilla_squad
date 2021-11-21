@@ -26,4 +26,4 @@ tests/test_%.o: tests/test_%.c $(VASQ_HEADER_FILES)
 	$(CC) $(CFLAGS) -I$(VASQ_INCLUDE_DIR) -c $< -o $@
 
 clean: $(CLEAN_TARGETS)
-	@rm -f $(TESTS) $(DEPS_FILES) README.pdf
+	@rm -f $(TESTS) $(DEPS_FILES)

@@ -12,6 +12,8 @@ DEPS_FILES += $(VASQ_DEPS_FILE)
 
 CLEAN_TARGETS += vasq_clean
 
+ifneq ($(MAKECMDGOALS),clean)
+
 $(VASQ_DEPS_FILE): $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	rm -f $@
 	for file in $(VASQ_SOURCE_FILES); do \
@@ -19,6 +21,8 @@ $(VASQ_DEPS_FILE): $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	    echo '\t$$(CC) $$(CFLAGS) -fpic -ffunction-sections -I$(VASQ_INCLUDE_DIR) -c $$< -o $$@' >> $@; \
 	done
 include $(VASQ_DEPS_FILE)
+
+endif
 
 $(VASQ_SHARED_LIBRARY): $(VASQ_OBJECT_FILES)
 	$(CC) -shared -o $@ $^

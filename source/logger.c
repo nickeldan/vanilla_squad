@@ -122,9 +122,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
         while (true) {
             new_fd = dup(fd);
             if (new_fd == -1) {
-                int local_errno = errno;
-
-                switch (local_errno) {
+                switch (errno) {
 #ifdef EBUSY
                 case EBUSY:
 #endif

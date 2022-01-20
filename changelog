@@ -1,3 +1,6 @@
+5.2.0:
+    - Added support for the VASQ_NO_LOGGING preprocessor variable.
+
 5.1.3:
     - errno is now guaranteed to contain a meaningful value if vasqLoggerCreate returns either
       VASQ_RET_DUP_FAIL or VASQ_RET_FNCTL_FAIL.

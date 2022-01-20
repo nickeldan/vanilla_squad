@@ -7,6 +7,11 @@
 #define VANILLA_SQUAD_CONFIG_H
 
 /**
+ * @brief Causes all logging logic to be removed during preprocessing.
+ */
+// #define VASQ_NO_LOGGING
+
+/**
  * @brief The maximum number of bytes which will be written by a log statement.
  */
 #define VASQ_LOGGING_LENGTH 1024

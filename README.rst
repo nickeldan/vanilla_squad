@@ -3,7 +3,7 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.1.3
+:Version: 5.2.0
 :Date: 2022-01-20
 
 Overview
@@ -170,6 +170,23 @@ There are various other functions provided by include/vasq/logger.h, such as a h
 the DEBUG level) and wrappers around **malloc**, **fork**, and **perror**.
 
 Logging messages are emitted in a signal-safe manner.  In addition, logging preserves the value of **errno**.
+
+Compiling out logging
+---------------------
+
+It may be the case that you'd like to strip logging from your project when compiling for production.  You
+could set your **vasqLogger** pointer to **NULL** or pass **VASQ_LL_NONE** to **vasqLoggerCreate**.  However,
+you'd still have the function call overheads of all of the logging functions.  To remove the logging logic
+completely, you can define the **VASQ_NO_LOGGING** preprocessor variable.  This will cause calls to functions
+like **vasqLogStatement** and **vasqHexDump** to be removed from your code at preprocessing time.  Calls to
+**vasqLoggerCreate** will be replaced by the constant **VASQ_RET_OK**.  Furthermore, calls to wrapper
+functions like **vasqMalloc** will be "unwrapped" (e.g., **vasqMalloc** will be replaced by **malloc**).
+These replacements will propagate to macros defined from these functions (e.g., **VASQ_INFO**).  See
+vasq/logger.h for the details of the replacements.
+
+Keep in mind that defining **VASQ_NO_LOGGING** will also remove the definitions of logging-related types like
+**vasqLogger** and **vasqLoggerDataProcessor**.  Therefore, you'll have to **#define** out any such variables
+manually.
 
 Placeholders
 ============

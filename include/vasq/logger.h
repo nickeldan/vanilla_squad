@@ -28,6 +28,11 @@ typedef enum vasqLogLevel {
     VASQ_LL_DEBUG,
 } vasqLogLevel_t;
 
+#define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
+#define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__
+
+#ifndef VASQ_NO_LOGGING
+
 typedef struct vasqLogger vasqLogger;
 
 /*
@@ -170,9 +175,6 @@ vasqLoggerUserData(const vasqLogger *logger);
 void
 vasqSetLoggerUserData(vasqLogger *logger, void *user);
 
-#define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
-#define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__
-
 /**
  * @brief Emit a logging message.
  *
@@ -187,42 +189,6 @@ vasqSetLoggerUserData(vasqLogger *logger, void *user);
  */
 void
 vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format, ...);
-
-/**
- * @brief Emit a message at the ALWAYS level.
- */
-#define VASQ_ALWAYS(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_ALWAYS, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
-
-/**
- * @brief Emit a message at the CRITICAL level.
- */
-#define VASQ_CRITICAL(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_CRITICAL, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
-
-/**
- * @brief Emit a message at the ERROR level.
- */
-#define VASQ_ERROR(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_ERROR, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
-
-/**
- * @brief Emit a message at the WARNING level.
- */
-#define VASQ_WARNING(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_WARNING, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
-
-/**
- * @brief Emit a message at the INFO level.
- */
-#define VASQ_INFO(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_INFO, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
-
-/**
- * @brief Emit a message at the DEBUG level.
- */
-#define VASQ_DEBUG(logger, format, ...) \
-    vasqLogStatement(logger, VASQ_LL_DEBUG, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
 
 /**
  * @brief Same as vasqLogStatement but takes a va_list instead of variable arguments.
@@ -261,11 +227,6 @@ void
 vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size);
 
 /**
- * @brief Wrap vasqHexDump by automatically supplying the file name, function name, and line number.
- */
-#define VASQ_HEXDUMP(logger, name, data, size) vasqHexDump(logger, VASQ_CONTEXT_PARAMS, name, data, size)
-
-/**
  * @brief Wrap malloc.
  *
  * Emits a log message at the ERROR level if the allocation fails.
@@ -280,11 +241,6 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
  */
 void *
 vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
-
-/**
- * @brief Wrap vasqMalloc by automatically supplying the file name, function name, and line number.
- */
-#define VASQ_MALLOC(logger, size) vasqMalloc(logger, VASQ_CONTEXT_PARAMS, size)
 
 /**
  * @brief Wrap calloc.
@@ -304,11 +260,6 @@ void *
 vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size);
 
 /**
- * @brief Wrap vasqCalloc by automatically supplying the file name, function name, and line number.
- */
-#define VASQ_CALLOC(logger, nmemb, size) vasqCalloc(logger, VASQ_CONTEXT_PARAMS, nmemb, size)
-
-/**
  * @brief Wrap realloc.
  *
  * Emits a log message at the ERROR level if the allocation fails.
@@ -324,11 +275,6 @@ vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t siz
  */
 void *
 vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size);
-
-/**
- * @brief Wrap vasqRealloc by automatically supplying the file name, function name, and line number.
- */
-#define VASQ_REALLOC(logger, ptr, size) vasqRealloc(logger, VASQ_CONTEXT_PARAMS, ptr, size)
 
 /**
  * @brief Wrap fork.
@@ -347,11 +293,6 @@ pid_t
 vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
 
 /**
- * @brief Wrap vasqFork by automatically supplying the file name, function name, and line number.
- */
-#define VASQ_FORK(logger) vasqFork(logger, VASQ_DECL_PARAMS)
-
-/**
  * @brief Wrap exit or _exit.
  *
  * Emits a log message at the VASQ_LL_PROCESS (see config.h) level.  After that, vasqLoggerFree is called on
@@ -366,6 +307,124 @@ vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
  */
 void
 vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribute__((noreturn));
+
+#else  // VASQ_NO_LOGGING
+
+#define vasqLoggerCreate(...)                     VASQ_RET_OK
+#define vasqLoggerFree(logger)                    NO_OP
+#define vasqLoggerFd(logger)                      -1
+#define vasqSetLoggerFormat(logger, format)       true
+#define vasqsetLoggerLevel(logger, level)         NO_OP
+#define vasqSetLoggerProcessor(logger, processor) NO_OP
+#define vasqLoggerUserData(logger)                NULL
+#define vasqSetLogerUserData(logger, user)        NO_OP
+
+#define vasqLogStatement(...)  NO_OP
+#define vasqVLogStatement(...) NO_OP
+#define vasqRawLog(...)        NO_OP
+#define vasqVRawLog(...)       NO_OP
+#define vasqHexDump(...)       NO_OP
+
+#define vasqMalloc(logger, file, func, line, size)              malloc(size)
+#define vasqCalloc(logger, file, func, line, nmemb, size)       calloc(nmemb, size)
+#define vasqRealloc(logger, file, func, line, nmemb, ptr, size) realloc(ptr, size)
+#define vasqFork(...)                                           fork()
+#define vasqExit(logger, file, func, line, value, quick)        (((quick) ? _exit : exit)(value))
+
+#endif  // VASQ_NO_LOGGING
+
+/**
+ * @brief Emit a message at the ALWAYS level.
+ */
+#define VASQ_ALWAYS(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_ALWAYS, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Emit a message at the CRITICAL level.
+ */
+#define VASQ_CRITICAL(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_CRITICAL, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Emit a message at the ERROR level.
+ */
+#define VASQ_ERROR(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_ERROR, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Emit a message at the WARNING level.
+ */
+#define VASQ_WARNING(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_WARNING, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Emit a message at the INFO level.
+ */
+#define VASQ_INFO(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_INFO, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Emit a message at the DEBUG level.
+ */
+#define VASQ_DEBUG(logger, format, ...) \
+    vasqLogStatement(logger, VASQ_LL_DEBUG, VASQ_CONTEXT_PARAMS, format, ##__VA_ARGS__)
+
+/**
+ * @brief Logging equivalent of the perror function at the CRITICAL level.
+ *
+ * @param logger The logger handle.
+ * @param msg The argument that would normally be passed to perror.
+ * @param errnum The errno value.
+ *
+ * @warning msg must be a string literal and not a variable.
+ */
+#define VASQ_PCRITICAL(logger, msg, errnum) VASQ_CRITICAL(logger, msg ": %s", strerror(errnum))
+/**
+ * @brief Logging equivalent of the perror function at the ERROR level.
+ *
+ * @param logger The logger handle.
+ * @param msg The argument that would normally be passed to perror.
+ * @param errnum The errno value.
+ *
+ * @warning msg must be a string literal and not a variable.
+ */
+#define VASQ_PERROR(logger, msg, errnum) VASQ_ERROR(logger, msg ": %s", strerror(errnum))
+
+/**
+ * @brief Logging equivalent of the perror function at the WARNING level.
+ *
+ * @param logger The logger handle.
+ * @param msg The argument that would normally be passed to perror.
+ * @param errnum The errno value.
+ *
+ * @warning msg must be a string literal and not a variable.
+ */
+#define VASQ_PWARNING(logger, msg, errnum) VASQ_WARNING(logger, msg ": %s", strerror(errnum))
+
+/**
+ * @brief Wrap vasqHexDump by automatically supplying the file name, function name, and line number.
+ */
+#define VASQ_HEXDUMP(logger, name, data, size) vasqHexDump(logger, VASQ_CONTEXT_PARAMS, name, data, size)
+
+/**
+ * @brief Wrap vasqMalloc by automatically supplying the file name, function name, and line number.
+ */
+#define VASQ_MALLOC(logger, size) vasqMalloc(logger, VASQ_CONTEXT_PARAMS, size)
+
+/**
+ * @brief Wrap vasqCalloc by automatically supplying the file name, function name, and line number.
+ */
+#define VASQ_CALLOC(logger, nmemb, size) vasqCalloc(logger, VASQ_CONTEXT_PARAMS, nmemb, size)
+
+/**
+ * @brief Wrap vasqRealloc by automatically supplying the file name, function name, and line number.
+ */
+#define VASQ_REALLOC(logger, ptr, size) vasqRealloc(logger, VASQ_CONTEXT_PARAMS, ptr, size)
+
+/**
+ * @brief Wrap vasqFork by automatically supplying the file name, function name, and line number.
+ */
+#define VASQ_FORK(logger) vasqFork(logger, VASQ_DECL_PARAMS)
 
 /**
  * @brief Wrap vasqExit by automatically supplying the file name, function name, and line number and setting
@@ -414,37 +473,5 @@ extern bool _vasq_abort_caught;
 #define VASQ_ASSERT(logger, expr) NO_OP
 
 #endif  // DEBUG
-
-/**
- * @brief Logging equivalent of the perror function at the CRITICAL level.
- *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
- */
-#define VASQ_PCRITICAL(logger, msg, errnum) VASQ_CRITICAL(logger, msg ": %s", strerror(errnum))
-/**
- * @brief Logging equivalent of the perror function at the ERROR level.
- *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
- */
-#define VASQ_PERROR(logger, msg, errnum) VASQ_ERROR(logger, msg ": %s", strerror(errnum))
-
-/**
- * @brief Logging equivalent of the perror function at the WARNING level.
- *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
- */
-#define VASQ_PWARNING(logger, msg, errnum) VASQ_WARNING(logger, msg ": %s", strerror(errnum))
 
 #endif  // VANILLA_SQUAD_LOGGER_H

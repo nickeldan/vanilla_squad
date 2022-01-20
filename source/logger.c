@@ -1,3 +1,5 @@
+#ifndef VASQ_NO_LOGGING
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -510,3 +512,5 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick)
     vasqLoggerFree(logger);
     (quick ? exit : _exit)(value);
 }
+
+#endif  // VASQ_NO_LOGGING

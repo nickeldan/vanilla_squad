@@ -101,7 +101,7 @@ int
 vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLoggerOptions *options,
                  vasqLogger **logger)
 {
-    int new_fd;
+    int new_fd, local_errno;
     const vasqLoggerOptions default_options = {0};
     const vasqLoggerOptions *use_these_opts = options ? options : &default_options;
 
@@ -122,13 +122,18 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
         while (true) {
             new_fd = dup(fd);
             if (new_fd == -1) {
-                switch (errno) {
+                local_errno = errno;
+
+                switch (local_errno) {
 #ifdef EBUSY
                 case EBUSY:
 #endif
                 case EINTR: continue;
 
-                default: free(*logger); return VASQ_RET_DUP_FAIL;
+                default:
+                    free(*logger);
+                    errno = local_errno;
+                    return VASQ_RET_DUP_FAIL;
                 }
             }
             else {
@@ -154,7 +159,9 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
 
         flags = fcntl(new_fd, F_GETFD);
         if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
+            local_errno = errno;
             vasqLoggerFree(*logger);
+            errno = local_errno;
             return VASQ_RET_FCNTL_FAIL;
         }
     }

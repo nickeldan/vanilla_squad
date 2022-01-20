@@ -1,3 +1,7 @@
+5.1.3:
+    - errno is now guaranteed to contain a meaningful value if vasqLoggerCreate returns either
+      VASQ_RET_DUP_FAIL or VASQ_RET_FNCTL_FAIL.
+
 5.1.2:
     - PLACEHOLDER() now works as long as the C standard version is at least C99.
     - Fixed a potential format string injection vulnerability in VASQ_ASSERT.

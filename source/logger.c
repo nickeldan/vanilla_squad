@@ -42,7 +42,9 @@ validLogFormat(const char *format)
                 }
             /* FALLTHROUGH */
             case 'p':
+#ifdef __linux__
             case 'T':
+#endif
             case 'L':
             case '_':
             case 'u':
@@ -281,7 +283,9 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
 
             case 'p': vasqIncSnprintf(&dst, &remaining, "%li", (long)getpid()); break;
 
+#ifdef __linux__
             case 'T': vasqIncSnprintf(&dst, &remaining, "%li", syscall(SYS_gettid)); break;
+#endif
 
             case 'L': vasqIncSnprintf(&dst, &remaining, "%s", logLevelName(level)); break;
 

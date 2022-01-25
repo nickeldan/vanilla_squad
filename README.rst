@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.2.0
-:Date: 2022-01-20
+:Version: 5.2.1
+:Date: 2022-01-24
 
 Overview
 ========
@@ -119,7 +119,7 @@ The format string looks like a **printf** string and accepts the following % tok
 
 * %M: The log message.  More than one of these in a format string is not allowed.
 * %p: Process ID.
-* %T: Thread ID.
+* %T: Thread ID.  Only available if compiling for Linux.
 * %L: Log level.
 * %_: Space padding that can be used with %L.  See below for an example of its usage.
 * %u: Unix epoch time in seconds.

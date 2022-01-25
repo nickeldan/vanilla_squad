@@ -1,3 +1,6 @@
+5.2.1:
+    - Removed the %T logging token when not compiling for Linux.
+
 5.2.0:
     - Added support for the VASQ_NO_LOGGING preprocessor variable.
 

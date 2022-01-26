@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.2.1
-:Date: 2022-01-24
+:Version: 5.2.2
+:Date: 2022-01-26
 
 Overview
 ========

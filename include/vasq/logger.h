@@ -325,11 +325,11 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
 #define vasqVRawLog(...)       NO_OP
 #define vasqHexDump(...)       NO_OP
 
-#define vasqMalloc(logger, file, func, line, size)              malloc(size)
-#define vasqCalloc(logger, file, func, line, nmemb, size)       calloc(nmemb, size)
-#define vasqRealloc(logger, file, func, line, nmemb, ptr, size) realloc(ptr, size)
-#define vasqFork(...)                                           fork()
-#define vasqExit(logger, file, func, line, value, quick)        (((quick) ? _exit : exit)(value))
+#define vasqMalloc(logger, file, func, line, size)        malloc(size)
+#define vasqCalloc(logger, file, func, line, nmemb, size) calloc(nmemb, size)
+#define vasqRealloc(logger, file, func, line, ptr, size)  realloc(ptr, size)
+#define vasqFork(...)                                     fork()
+#define vasqExit(logger, file, func, line, value, quick)  (((quick) ? _exit : exit)(value))
 
 #endif  // VASQ_NO_LOGGING
 

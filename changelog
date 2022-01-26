@@ -1,3 +1,6 @@
+5.2.2:
+    - Fixed a typo in the VASQ_REALLOC macro definition for when VASQ_NO_LOGGING is defined.
+
 5.2.1:
     - Removed the %T logging token when not compiling for Linux.
 

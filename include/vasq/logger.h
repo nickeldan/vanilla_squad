@@ -433,6 +433,9 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
 #define VASQ_WARNING(...)      NO_OP
 #define VASQ_INFO(...)         NO_OP
 #define VASQ_DEBUG(...)        NO_OP
+#define VASQ_PCRITICAL(...)    NO_OP
+#define VASQ_PERROR(...)       NO_OP
+#define VASQ_PWARNING(...)     NO_OP
 #define vasqRawLog(...)        NO_OP
 #define vasqVRawLog(...)       NO_OP
 #define vasqHexDump(...)       NO_OP

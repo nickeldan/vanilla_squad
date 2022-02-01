@@ -1,3 +1,6 @@
+5.2.3:
+    - Fixed the expansion of the logger macros when VASQ_NO_LOGGING is defined.
+
 5.2.2:
     - Fixed a typo in the VASQ_REALLOC macro definition for when VASQ_NO_LOGGING is defined.
 

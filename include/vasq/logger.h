@@ -28,10 +28,10 @@ typedef enum vasqLogLevel {
     VASQ_LL_DEBUG,
 } vasqLogLevel_t;
 
+#ifndef VASQ_NO_LOGGING
+
 #define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
 #define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__
-
-#ifndef VASQ_NO_LOGGING
 
 typedef struct vasqLogger vasqLogger;
 
@@ -191,149 +191,6 @@ void
 vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format, ...);
 
 /**
- * @brief Same as vasqLogStatement but takes a va_list instead of variable arguments.
- */
-void
-vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format,
-                  va_list args);
-
-/**
- * @brief Write directly to a logger's descriptor.
- *
- * @param logger The logger handle.
- * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
- */
-void
-vasqRawLog(const vasqLogger *logger, const char *format, ...);
-
-/**
- * @brief Same as vasqRawLog but takes a va_list insead of variable arguments.
- */
-void
-vasqVRawLog(const vasqLogger *logger, const char *format, va_list args);
-
-/**
- * @brief Display a hex dump of a section of memory.  The dump appears at the DEBUG level.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param name A description of the data.
- * @param data A pointer to the data.
- * @param size The number of bytes to display.
- */
-void
-vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size);
-
-/**
- * @brief Wrap malloc.
- *
- * Emits a log message at the ERROR level if the allocation fails.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param size The number of bytes to allocate.
- *
- * @return The same return value as malloc.
- */
-void *
-vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
-
-/**
- * @brief Wrap calloc.
- *
- * Emits a log message at the ERROR level if the allocation fails.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param nmemb The number of items to allocate.
- * @param size The size of each allocated item.
- *
- * @return The same return value as calloc.
- */
-void *
-vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size);
-
-/**
- * @brief Wrap realloc.
- *
- * Emits a log message at the ERROR level if the allocation fails.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param ptr A pointer to the original data.
- * @param size The size of the new data.
- *
- * @return The same return value as realloc.
- */
-void *
-vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size);
-
-/**
- * @brief Wrap fork.
- *
- * Emits a log message at the ERROR level if fork fails.  Otherwise, the child process emits a log message
- * at the VASQ_LL_PROCESS (see config.h) level.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- *
- * @return The same return value as fork.
- */
-pid_t
-vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
-
-/**
- * @brief Wrap exit or _exit.
- *
- * Emits a log message at the VASQ_LL_PROCESS (see config.h) level.  After that, vasqLoggerFree is called on
- * the logger handle.
- *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param value The value passed to exit/_exit.
- * @param quick If true, _exit is called.  Otherwise, exit is called.
- */
-void
-vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribute__((noreturn));
-
-#else  // VASQ_NO_LOGGING
-
-#define vasqLoggerCreate(...)                     VASQ_RET_OK
-#define vasqLoggerFree(logger)                    NO_OP
-#define vasqLoggerFd(logger)                      -1
-#define vasqSetLoggerFormat(logger, format)       true
-#define vasqsetLoggerLevel(logger, level)         NO_OP
-#define vasqSetLoggerProcessor(logger, processor) NO_OP
-#define vasqLoggerUserData(logger)                NULL
-#define vasqSetLogerUserData(logger, user)        NO_OP
-
-#define vasqLogStatement(...)  NO_OP
-#define vasqVLogStatement(...) NO_OP
-#define vasqRawLog(...)        NO_OP
-#define vasqVRawLog(...)       NO_OP
-#define vasqHexDump(...)       NO_OP
-
-#define vasqMalloc(logger, file, func, line, size)        malloc(size)
-#define vasqCalloc(logger, file, func, line, nmemb, size) calloc(nmemb, size)
-#define vasqRealloc(logger, file, func, line, ptr, size)  realloc(ptr, size)
-#define vasqFork(...)                                     fork()
-#define vasqExit(logger, file, func, line, value, quick)  (((quick) ? _exit : exit)(value))
-
-#endif  // VASQ_NO_LOGGING
-
-/**
  * @brief Emit a message at the ALWAYS level.
  */
 #define VASQ_ALWAYS(logger, format, ...) \
@@ -402,9 +259,61 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
 #define VASQ_PWARNING(logger, msg, errnum) VASQ_WARNING(logger, msg ": %s", strerror(errnum))
 
 /**
+ * @brief Same as vasqLogStatement but takes a va_list instead of variable arguments.
+ */
+void
+vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format,
+                  va_list args);
+
+/**
+ * @brief Write directly to a logger's descriptor.
+ *
+ * @param logger The logger handle.
+ * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
+ */
+void
+vasqRawLog(const vasqLogger *logger, const char *format, ...);
+
+/**
+ * @brief Same as vasqRawLog but takes a va_list insead of variable arguments.
+ */
+void
+vasqVRawLog(const vasqLogger *logger, const char *format, va_list args);
+
+/**
+ * @brief Display a hex dump of a section of memory.  The dump appears at the DEBUG level.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ * @param name A description of the data.
+ * @param data A pointer to the data.
+ * @param size The number of bytes to display.
+ */
+void
+vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size);
+
+/**
  * @brief Wrap vasqHexDump by automatically supplying the file name, function name, and line number.
  */
 #define VASQ_HEXDUMP(logger, name, data, size) vasqHexDump(logger, VASQ_CONTEXT_PARAMS, name, data, size)
+
+/**
+ * @brief Wrap malloc.
+ *
+ * Emits a log message at the ERROR level if the allocation fails.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ * @param size The number of bytes to allocate.
+ *
+ * @return The same return value as malloc.
+ */
+void *
+vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
 
 /**
  * @brief Wrap vasqMalloc by automatically supplying the file name, function name, and line number.
@@ -412,9 +321,43 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
 #define VASQ_MALLOC(logger, size) vasqMalloc(logger, VASQ_CONTEXT_PARAMS, size)
 
 /**
+ * @brief Wrap calloc.
+ *
+ * Emits a log message at the ERROR level if the allocation fails.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ * @param nmemb The number of items to allocate.
+ * @param size The size of each allocated item.
+ *
+ * @return The same return value as calloc.
+ */
+void *
+vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size);
+
+/**
  * @brief Wrap vasqCalloc by automatically supplying the file name, function name, and line number.
  */
 #define VASQ_CALLOC(logger, nmemb, size) vasqCalloc(logger, VASQ_CONTEXT_PARAMS, nmemb, size)
+
+/**
+ * @brief Wrap realloc.
+ *
+ * Emits a log message at the ERROR level if the allocation fails.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ * @param ptr A pointer to the original data.
+ * @param size The size of the new data.
+ *
+ * @return The same return value as realloc.
+ */
+void *
+vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size);
 
 /**
  * @brief Wrap vasqRealloc by automatically supplying the file name, function name, and line number.
@@ -422,9 +365,41 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
 #define VASQ_REALLOC(logger, ptr, size) vasqRealloc(logger, VASQ_CONTEXT_PARAMS, ptr, size)
 
 /**
+ * @brief Wrap fork.
+ *
+ * Emits a log message at the ERROR level if fork fails.  Otherwise, the child process emits a log message
+ * at the VASQ_LL_PROCESS (see config.h) level.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ *
+ * @return The same return value as fork.
+ */
+pid_t
+vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
+
+/**
  * @brief Wrap vasqFork by automatically supplying the file name, function name, and line number.
  */
 #define VASQ_FORK(logger) vasqFork(logger, VASQ_DECL_PARAMS)
+
+/**
+ * @brief Wrap exit or _exit.
+ *
+ * Emits a log message at the VASQ_LL_PROCESS (see config.h) level.  After that, vasqLoggerFree is called on
+ * the logger handle.
+ *
+ * @param logger The logger handle.
+ * @param file_name The name of the file where the message originated.
+ * @param function_name The name of the function where the message originated.
+ * @param line_no The line number where the message originated.
+ * @param value The value passed to exit/_exit.
+ * @param quick If true, _exit is called.  Otherwise, exit is called.
+ */
+void
+vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribute__((noreturn));
 
 /**
  * @brief Wrap vasqExit by automatically supplying the file name, function name, and line number and setting
@@ -437,6 +412,45 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribu
  * quick to true.
  */
 #define VASQ_QUICK_EXIT(logger, value) vasqExit(logger, VASQ_CONTEXT_PARAMS, value, true)
+
+#else  // VASQ_NO_LOGGING
+
+#define vasqLoggerCreate(...)                     VASQ_RET_OK
+#define vasqLoggerFree(logger)                    NO_OP
+#define vasqLoggerFd(logger)                      -1
+#define vasqSetLoggerFormat(logger, format)       true
+#define vasqLoggerLevel(logger)                   VASQ_LL_NONE
+#define vasqsetLoggerLevel(logger, level)         NO_OP
+#define vasqSetLoggerProcessor(logger, processor) NO_OP
+#define vasqLoggerUserData(logger)                NULL
+#define vasqSetLogerUserData(logger, user)        NO_OP
+
+#define vasqLogStatement(...)  NO_OP
+#define vasqVLogStatement(...) NO_OP
+#define VASQ_ALWAYS(...)       NO_OP
+#define VASQ_CRITICAL(...)     NO_OP
+#define VASQ_ERROR(...)        NO_OP
+#define VASQ_WARNING(...)      NO_OP
+#define VASQ_INFO(...)         NO_OP
+#define VASQ_DEBUG(...)        NO_OP
+#define vasqRawLog(...)        NO_OP
+#define vasqVRawLog(...)       NO_OP
+#define vasqHexDump(...)       NO_OP
+#define VASQ_HEXDUMP(...)      NO_OP
+
+#define vasqMalloc(logger, file, func, line, size)        malloc(size)
+#define VASQ_MALLOC(logger, size)                         malloc(size)
+#define vasqCalloc(logger, file, func, line, nmemb, size) calloc(nmemb, size)
+#define VASQ_CALLOC(logger, nmemb, size)                  calloc(nmemb, size)
+#define vasqRealloc(logger, file, func, line, ptr, size)  realloc(ptr, size)
+#define VASQ_REALLOC(logger, ptr, size)                   realloc(ptr, size)
+#define vasqFork(...)                                     fork()
+#define VASQ_FORK()                                       fork()
+#define vasqExit(logger, file, func, line, value, quick)  (((quick) ? _exit : exit)(value))
+#define VASQ_EXIT(logger, value)                          exit(value)
+#define VASQ_QUICK_EXIT(logger, value)                    _exit(value)
+
+#endif  // VASQ_NO_LOGGING
 
 #ifdef DEBUG
 

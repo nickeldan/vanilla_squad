@@ -176,12 +176,15 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
 void
 vasqLoggerFree(vasqLogger *logger)
 {
-    if (logger) {
-        if (logger->duped) {
-            close(logger->fd);
-        }
-        free(logger);
+    if (!logger) {
+        return;
     }
+
+    if (logger->duped) {
+        close(logger->fd);
+    }
+
+    free(logger);
 }
 
 int
@@ -211,19 +214,23 @@ vasqLoggerLevel(const vasqLogger *logger)
 void
 vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level)
 {
-    if (logger) {
-        logger->level = level;
-        vasqLogStatement(logger, VASQ_LL_LEVEL_CHANGE, VASQ_CONTEXT_PARAMS, "Log level set to %s",
-                         logLevelName(level));
+    if (!logger) {
+        return;
     }
+
+    logger->level = level;
+    vasqLogStatement(logger, VASQ_LL_LEVEL_CHANGE, VASQ_CONTEXT_PARAMS, "Log level set to %s",
+                     logLevelName(level));
 }
 
 void
 vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor)
 {
-    if (logger) {
-        logger->processor = processor;
+    if (!logger) {
+        return;
     }
+
+    logger->processor = processor;
 }
 
 void *
@@ -235,9 +242,11 @@ vasqLoggerUserData(const vasqLogger *logger)
 void
 vasqSetLoggerUserData(vasqLogger *logger, void *user)
 {
-    if (logger) {
-        logger->user = user;
+    if (!logger) {
+        return;
     }
+
+    logger->user = user;
 }
 
 void

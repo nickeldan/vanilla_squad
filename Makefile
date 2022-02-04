@@ -15,9 +15,11 @@ all: _all
 VASQ_DIR := .
 include make.mk
 
-.PHONY: all _all install uninstall clean $(CLEAN_TARGETS)
+.PHONY: all _all tests install uninstall clean $(CLEAN_TARGETS)
 
-_all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(TESTS)
+_all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY)
+
+tests: $(TESTS)
 
 install: /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY)) $(foreach file,$(VASQ_HEADER_FILES),/usr/local/include/vasq/$(notdir $(file)))
 

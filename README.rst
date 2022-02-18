@@ -220,7 +220,7 @@ optimization and build the libraries with debugging symbols.
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the
 **VASQ_DIR** variable must be set to the location of the Vanilla Squad directory.  You can also tell make
 where to place the shared and static libraries by defining the **VASQ_LIB_DIR** variable (defaults to
-**VASQ_DIR**.
+**VASQ_DIR**).
 
 make.mk adds a target to the **CLEAN_TARGETS** variable.  This is so that implementing
 

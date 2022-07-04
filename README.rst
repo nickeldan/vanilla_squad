@@ -110,7 +110,7 @@ be pointers to the destination and remaining size and function as in **vasqIncSn
 responsible for adjusting these two values (recall that the terminator is not included in the calculation).
 The processor can write a terminator at the end but it is not necessary.
 
-So far, there are two flags that can be passed in via **flags**:
+The valid flags are:
 
 * **VASQ_LOGGER_FLAG_DUP**: Instead of using the provided file descriptor, this option causes **dup** to be called.  The new descriptor is closed when the logger is freed.
 * **VASQ_LOGGER_FLAG_CLOEXEC**: This option causes the **FD_CLOEXEC** flag to be set on the file descriptor.

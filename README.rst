@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.2.3
-:Date: 2022-01-31
+:Version: 5.3.0
+:Date: 2022-07-04
 
 Overview
 ========
@@ -114,6 +114,7 @@ So far, there are two flags that can be passed in via **flags**:
 
 * **VASQ_LOGGER_FLAG_DUP**: Instead of using the provided file descriptor, this option causes **dup** to be called.  The new descriptor is closed when the logger is freed.
 * **VASQ_LOGGER_FLAG_CLOEXEC**: This option causes the **FD_CLOEXEC** flag to be set on the file descriptor.
+* **VASQ_LOGGER_FLAG_HEX_DUMP_INFO**: Emit hex dumps at the **INFO** level instead of the default of **DEBUG**.
 
 The format string looks like a **printf** string and accepts the following % tokens:
 

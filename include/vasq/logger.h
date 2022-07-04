@@ -80,7 +80,8 @@ typedef struct vasqLoggerOptions {
 #define VASQ_LOGGER_FLAG_DUP \
     0x00000001  /// Cause the provided file descriptor to be duplicated (and closed when the logger is
                 /// freed).
-#define VASQ_LOGGER_FLAG_CLOEXEC 0x00000002  /// Set FD_CLOEXEC on the file descriptor.
+#define VASQ_LOGGER_FLAG_CLOEXEC       0x00000002  /// Set FD_CLOEXEC on the file descriptor.
+#define VASQ_LOGGER_FLAG_HEX_DUMP_INFO 0x00000004  /// Emit hex dumps at the INFO level.
 
 /**
  * @brief Allocate and initialize a logger.

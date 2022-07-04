@@ -22,6 +22,7 @@ struct vasqLogger {
     int fd;
     vasqLogLevel_t level;
     unsigned int duped : 1;
+    unsigned int hex_dump_info : 1;
 };
 
 static bool
@@ -156,6 +157,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
     (*logger)->format = format;
     (*logger)->processor = use_these_opts->processor;
     (*logger)->user = use_these_opts->user;
+    (*logger)->hex_dump_info = !!(use_these_opts->flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO);
     vasqSetLoggerLevel(*logger, level);
 
     if (use_these_opts->flags & VASQ_LOGGER_FLAG_CLOEXEC) {
@@ -406,15 +408,20 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
     char *dst = output;
     int remote_errno;
     size_t actual_dump_size, remaining = sizeof(output);
+    vasqLogLevel_t dump_level;
 
-    if (!logger || logger->level < VASQ_LL_DEBUG) {
+    if (!logger) {
+        return;
+    }
+    dump_level = logger->hex_dump_info ? VASQ_LL_INFO : VASQ_LL_DEBUG;
+    if (logger->level < dump_level) {
         return;
     }
 
     remote_errno = errno;
 
-    vasqLogStatement(logger, VASQ_LL_DEBUG, file_name, function_name, line_no, "%s (%zu byte%s):", name,
-                     size, (size == 1) ? "" : "s");
+    vasqLogStatement(logger, dump_level, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
+                     (size == 1) ? "" : "s");
 
     actual_dump_size = MIN(size, VASQ_HEXDUMP_SIZE);
     for (size_t k = 0; k < actual_dump_size; k += VASQ_HEXDUMP_WIDTH) {

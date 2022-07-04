@@ -1,3 +1,6 @@
+5.3.0:
+    - Added VASQ_LOGGER_FLAG_HEX_DUMP_INFO.
+
 5.2.3:
     - Fixed the expansion of the logger macros when VASQ_NO_LOGGING is defined.
 

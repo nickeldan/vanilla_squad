@@ -1,3 +1,6 @@
+5.3.1:
+    - Fixed the handling of the quick parameter to vasqExit.
+
 5.3.0:
     - Added VASQ_LOGGER_FLAG_HEX_DUMP_INFO.
 

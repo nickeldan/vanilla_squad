@@ -530,7 +530,7 @@ vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick)
     vasqLogStatement(logger, VASQ_LL_PROCESS, file_name, function_name, line_no,
                      "Process exiting with value %i", value);
     vasqLoggerFree(logger);
-    (quick ? exit : _exit)(value);
+    (quick ? _exit : exit)(value);
 }
 
 #endif  // VASQ_NO_LOGGING

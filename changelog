@@ -1,3 +1,6 @@
+5.4.0:
+    - Added the ability to print long and long long hex values.
+
 5.3.1:
     - Fixed the handling of the quick parameter to vasqExit.
 

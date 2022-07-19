@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.3.1
-:Date: 2022-07-07
+:Version: 5.4.0
+:Date: 2022-07-18
 
 Overview
 ========
@@ -50,10 +50,10 @@ The % tokens recognized by these functions are
 * %.*s
 * %x
 * %X
-* %<N>x (e.g., %4x) (N must be a single digit)
-* %<N>X
-* %0<N>x (e.g., %04x)
-* %0<N>X
+* %<N>[l/ll]x (e.g., %4x) (N must be a single digit)
+* %<N>[l/ll]X
+* %0<N>[l/ll]x (e.g., %04x)
+* %0<N>[l/ll]X
 
 Logging
 =======

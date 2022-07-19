@@ -118,150 +118,73 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 *ptr = buffer - start;
             }
             else {
-                bool is_long;
+                uintmax_t value;
+                intmax_t signed_value = 0;
+                bool is_signed = false, is_long = false, is_long_long = false, show_hex = false,
+                     capitalize_hex = false;
                 char subbuffer[39];  // Big enough to hold a 128-bit unsigned integer without the null
                                      // terminator.
-                unsigned int index = sizeof(subbuffer);
+                unsigned int index = sizeof(subbuffer), min_length = 0;
+                char padding = ' ';
 
                 if (c == 'l') {
-                    is_long = true;
                     c = *(++format);
-                }
-                else {
-                    is_long = false;
+                    if (c == 'l') {
+                        is_long_long = true;
+                        c = *(++format);
+                    }
+                    else {
+                        is_long = true;
+                    }
                 }
 
                 if (c == 'u') {
-                    if (is_long) {
-                        unsigned long value;
-
-                        value = va_arg(args, unsigned long);
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
-                    else {
-                        unsigned int value;
-
-                        value = va_arg(args, unsigned int);
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
+                    value = is_long_long ? va_arg(args, unsigned long long) :
+                            is_long      ? va_arg(args, unsigned long) :
+                                           va_arg(args, unsigned int);
                 }
                 else if (c == 'i' || c == 'd') {
-                    if (is_long) {
-                        long value;
-
-                        value = va_arg(args, long);
-                        if (value < 0) {
-                            *(buffer++) = '-';
-                            if (--size == 0) {
-                                goto done;
-                            }
-                            value *= -1;
-                        }
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
-                    else {
-                        int value;
-
-                        value = va_arg(args, int);
-                        if (value < 0) {
-                            *(buffer++) = '-';
-                            if (--size == 0) {
-                                goto done;
-                            }
-                            value *= -1;
-                        }
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
-                }
-                else if (c == 'l') {
-                    // is_long must be true.
-
-                    c = *(++format);
-                    if (c == 'i' || c == 'd') {
-                        long long value;
-
-                        value = va_arg(args, long long);
-                        if (value < 0) {
-                            *(buffer++) = '-';
-                            if (--size == 0) {
-                                goto done;
-                            }
-                            value *= -1;
-                        }
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
-                    else if (c == 'u') {
-                        unsigned long long value;
-
-                        value = va_arg(args, unsigned long long);
-                        index -= numToBuffer(subbuffer + index - 1, value);
-                    }
-                    else {
-                        return -1;
-                    }
+                    is_signed = true;
+                    signed_value = is_long_long ? va_arg(args, long long) :
+                                   is_long      ? va_arg(args, long) :
+                                                  va_arg(args, int);
                 }
                 else if (c == 'z') {
-                    if (is_long) {
+                    if (is_long || is_long_long) {
                         return -1;
                     }
 
                     c = *(++format);
                     if (c == 'u') {
-                        size_t value;
-
                         value = va_arg(args, size_t);
-                        index -= numToBuffer(subbuffer + index - 1, value);
                     }
                     else if (c == 'i') {
-                        ssize_t value;
-
-                        value = va_arg(args, ssize_t);
-                        if (value < 0) {
-                            *(buffer++) = '-';
-                            if (--size == 0) {
-                                goto done;
-                            }
-                            value *= -1;
-                        }
-                        index -= numToBuffer(subbuffer + index - 1, value);
+                        is_signed = true;
+                        signed_value = va_arg(args, ssize_t);
                     }
                     else {
                         return -1;
                     }
                 }
                 else if (c == 'j') {
-                    if (is_long) {
+                    if (is_long || is_long_long) {
                         return -1;
                     }
 
                     c = *(++format);
                     if (c == 'u') {
-                        uintmax_t value;
-
                         value = va_arg(args, uintmax_t);
-                        index -= numToBuffer(subbuffer + index - 1, value);
                     }
                     else if (c == 'i') {
-                        intmax_t value;
-
-                        value = va_arg(args, intmax_t);
-                        if (value < 0) {
-                            *(buffer++) = '-';
-                            if (--size == 0) {
-                                goto done;
-                            }
-                            value *= -1;
-                        }
-                        index -= numToBuffer(subbuffer + index - 1, value);
+                        is_signed = true;
+                        signed_value = va_arg(args, intmax_t);
                     }
                     else {
                         return -1;
                     }
                 }
                 else if (c == 'p') {
-                    uintptr_t value;
-
-                    if (is_long) {
+                    if (is_long || is_long_long) {
                         return -1;
                     }
 
@@ -275,62 +198,77 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                         goto done;
                     }
 
+                    show_hex = true;
                     value = (uintptr_t)va_arg(args, void *);
-                    index -= numToBufferHex(subbuffer + index - 1, value, false);
                 }
                 else if (safeIsDigit(c) || c == 'x' || c == 'X') {
-                    unsigned int value;
-                    int min_length;
-                    char padding;
-                    bool capitalize;
-
-                    if (is_long) {
-                        return -1;
-                    }
+                    show_hex = true;
 
                     if (c == '0') {
                         padding = '0';
                         c = *(++format);
                     }
-                    else {
-                        padding = ' ';
-                    }
 
                     if (safeIsDigit(c)) {
                         min_length = c - '0';
                         c = *(++format);
+
+                        if (c == 'l') {
+                            c = *(++format);
+                            if (c == 'l') {
+                                is_long_long = true;
+                                c = *(++format);
+                            }
+                            else {
+                                is_long = true;
+                            }
+                        }
                     }
                     else {
                         min_length = 0;
                     }
 
-                    if (c == 'x') {
-                        capitalize = false;
+                    if (c == 'X') {
+                        capitalize_hex = true;
                     }
-                    else if (c == 'X') {
-                        capitalize = true;
-                    }
-                    else {
+                    else if (c != 'x') {
                         return -1;
                     }
 
-                    value = va_arg(args, unsigned int);
-                    index -= numToBufferHex(subbuffer + index - 1, value, capitalize);
-
-                    if (index == sizeof(subbuffer)) {
-                        subbuffer[--index] = '0';
-                    }
-
-                    while ((sizeof(subbuffer) - index) < (unsigned int)min_length && index > 0) {
-                        subbuffer[--index] = padding;
-                    }
+                    value = is_long_long ? va_arg(args, unsigned long long) :
+                            is_long      ? va_arg(args, unsigned long) :
+                                           va_arg(args, unsigned int);
                 }
                 else {
                     return -1;
                 }
 
+                if (is_signed) {
+                    if (signed_value < 0) {
+                        *(buffer++) = '-';
+                        if (--size == 0) {
+                            goto done;
+                        }
+                        value = -1 * signed_value;
+                    }
+                    else {
+                        value = signed_value;
+                    }
+                }
+
+                if (show_hex) {
+                    index -= numToBufferHex(subbuffer + index - 1, value, capitalize_hex);
+                }
+                else {
+                    index -= numToBuffer(subbuffer + index - 1, value);
+                }
+
                 if (index == sizeof(subbuffer)) {
                     subbuffer[--index] = '0';
+                }
+
+                while (index > 0 && sizeof(subbuffer) - index < min_length) {
+                    subbuffer[--index] = padding;
                 }
 
                 while (index < sizeof(subbuffer)) {

@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -7,6 +8,8 @@ int
 main()
 {
     int ret;
+    uintmax_t value = 0xdadbeef;
+    intmax_t signed_value = -1 * value;
     vasqLogger *logger;
     vasqLoggerOptions options = {.flags = VASQ_LOGGER_FLAG_DUP | VASQ_LOGGER_FLAG_CLOEXEC};
     unsigned char short_data[10];
@@ -54,6 +57,24 @@ main()
     VASQ_WARNING(logger, "This is a WARNING message");
     VASQ_INFO(logger, "This is an INFO message");
     VASQ_DEBUG(logger, "This is a DEBUG message");
+
+    VASQ_INFO(logger, "%%i: %i", (int)signed_value);
+    VASQ_INFO(logger, "%%d: %d", (int)signed_value);
+    VASQ_INFO(logger, "%%u: %u", (unsigned int)value);
+    VASQ_INFO(logger, "%%x: %x", (unsigned int)value);
+    VASQ_INFO(logger, "%%li: %li", (long)signed_value);
+    VASQ_INFO(logger, "%%ld: %ld", (long)signed_value);
+    VASQ_INFO(logger, "%%lu: %lu", (unsigned long)value);
+    VASQ_INFO(logger, "%%lx: %lx", (unsigned long)value);
+    VASQ_INFO(logger, "%%lli: %lli", (long long)signed_value);
+    VASQ_INFO(logger, "%%lld: %lld", (long long)signed_value);
+    VASQ_INFO(logger, "%%llu: %llu", (unsigned long long)value);
+    VASQ_INFO(logger, "%%llx: %llx", (unsigned long long)value);
+    VASQ_INFO(logger, "%%zi: %zi", (ssize_t)signed_value);
+    VASQ_INFO(logger, "%%zu: %zu", (size_t)value);
+    VASQ_INFO(logger, "%%ji: %ji", signed_value);
+    VASQ_INFO(logger, "%%ju: %ju", value);
+    VASQ_INFO(logger, "%%p: %p", &value);
 
     for (unsigned int k = 0; k < sizeof(short_data); k++) {
         short_data[k] = 10 * k;

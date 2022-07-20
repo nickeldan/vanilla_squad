@@ -279,7 +279,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
     remote_errno = errno;
 
     now = time(NULL);
-    gmtime_r(&now, &now_fields);
+    localtime_r(&now, &now_fields);
 
     for (size_t k = 0; logger->format[k]; k++) {
         char c = logger->format[k];
@@ -316,11 +316,11 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
                                 time_string);  // Don't include the newline character.
                 break;
 
-            case 'h': vasqIncSnprintf(&dst, &remaining, "%i", now_fields.tm_hour); break;
+            case 'h': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_hour); break;
 
-            case 'm': vasqIncSnprintf(&dst, &remaining, "%i", now_fields.tm_min); break;
+            case 'm': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_min); break;
 
-            case 's': vasqIncSnprintf(&dst, &remaining, "%i", now_fields.tm_sec); break;
+            case 's': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_sec); break;
 
             case 'F':
                 for (idx = strlen(file_name); idx > 0; idx--) {

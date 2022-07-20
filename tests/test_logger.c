@@ -40,9 +40,9 @@ main()
         "Sed imperdiet justo nibh, sed viverra erat sagittis et. Mauris vel malesuada odio.";
 
 #ifdef __linux__
-#define LOGGER_FORMAT "(%p:%T) (%t) [%L]%_ %F:%f:%l: %M\n"
+#define LOGGER_FORMAT "(%p:%T) (%h:%m:%s) (%t) [%L]%_ %F:%f:%l: %M\n"
 #else
-#define LOGGER_FORMAT "(%p) (%t) [%L]%_ %F:%f:%l: %M\n"
+#define LOGGER_FORMAT "(%p) (%h:%m:%s) (%t) [%L]%_ %F:%f:%l: %M\n"
 #endif
 
     ret = vasqLoggerCreate(STDOUT_FILENO, VASQ_LL_DEBUG, LOGGER_FORMAT, &options, &logger);

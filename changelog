@@ -1,3 +1,8 @@
+5.5.0:
+    - Added padding and minimum length specification for all integer types.
+    - Added support for %zd and %jd.
+    - Changed the handling of the %h token in logger formats to use the local time.
+
 5.4.0:
     - Added the ability to print long and long long hex values.
 

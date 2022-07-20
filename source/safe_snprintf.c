@@ -127,6 +127,18 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 unsigned int index = sizeof(subbuffer), min_length = 0;
                 char padding = ' ';
 
+                if (c == '0') {
+                    padding = '0';
+                    c = *(++format);
+                }
+                if (safeIsDigit(c)) {
+                    if (c == '0') {
+                        return -1;
+                    }
+                    min_length = c - '0';
+                    c = *(++format);
+                }
+
                 if (c == 'l') {
                     c = *(++format);
                     if (c == 'l') {
@@ -158,7 +170,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     if (c == 'u') {
                         value = va_arg(args, size_t);
                     }
-                    else if (c == 'i') {
+                    else if (c == 'i' || c == 'd') {
                         is_signed = true;
                         signed_value = va_arg(args, ssize_t);
                     }
@@ -175,7 +187,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     if (c == 'u') {
                         value = va_arg(args, uintmax_t);
                     }
-                    else if (c == 'i') {
+                    else if (c == 'i' || c == 'd') {
                         is_signed = true;
                         signed_value = va_arg(args, intmax_t);
                     }
@@ -201,38 +213,11 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     show_hex = true;
                     value = (uintptr_t)va_arg(args, void *);
                 }
-                else if (safeIsDigit(c) || c == 'x' || c == 'X') {
+                else if (c == 'x' || c == 'X') {
                     show_hex = true;
-
-                    if (c == '0') {
-                        padding = '0';
-                        c = *(++format);
-                    }
-
-                    if (safeIsDigit(c)) {
-                        min_length = c - '0';
-                        c = *(++format);
-
-                        if (c == 'l') {
-                            c = *(++format);
-                            if (c == 'l') {
-                                is_long_long = true;
-                                c = *(++format);
-                            }
-                            else {
-                                is_long = true;
-                            }
-                        }
-                    }
-                    else {
-                        min_length = 0;
-                    }
 
                     if (c == 'X') {
                         capitalize_hex = true;
-                    }
-                    else if (c != 'x') {
-                        return -1;
                     }
 
                     value = is_long_long ? va_arg(args, unsigned long long) :

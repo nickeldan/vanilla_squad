@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.4.0
-:Date: 2022-07-18
+:Version: 5.5.0
+:Date: 2022-07-19
 
 Overview
 ========
@@ -40,20 +40,29 @@ The % tokens recognized by these functions are
 * %lli
 * %lld
 * %llu
-* %zu
 * %zi
-* %ju
+* %zd
+* %zu
 * %ji
-* %p
-* %s
-* %n
-* %.*s
+* %jd
+* %ju
 * %x
 * %X
-* %<N>[l/ll]x (e.g., %4x) (N must be a single digit)
-* %<N>[l/ll]X
-* %0<N>[l/ll]x (e.g., %04x)
-* %0<N>[l/ll]X
+* %lx
+* %lX
+* %llx
+* %llX
+* %p
+* %s
+* %.*s
+* %n
+
+In addition, zero-padding and minimum-length specification can be added to any integer type.  E.g.,
+
+.. code-block:: c
+
+    vasqSafeSnprintf(buffer, size, "%04i", 5); // "0005"
+    vasqSafeSnprintf(buffer, size, "%2x", 10); // " a"
 
 Logging
 =======

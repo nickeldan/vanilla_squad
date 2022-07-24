@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 5.5.0
-:Date: 2022-07-19
+:Version: 6.0.0
+:Date: 2022-07-24
 
 Overview
 ========
@@ -26,7 +26,8 @@ guaranteed to be written to the destination.
 
 **vasqIncSnprintf** and **vasqIncVsnprintf** function similarly except that they take pointers to the
 destination as well as the size of the destination.  Upon success, they adjust the destination and size so
-that subsequent calls to these functions will pick up where the previous call left off.
+that subsequent calls to these functions will pick up where the previous call left off.  To be clear, if the
+size is 1, then no characters will be written beyond the null terminator and the size will be unchanged.
 
 The % tokens recognized by these functions are
 
@@ -116,8 +117,8 @@ When the logger encounters a **%x** in the format string, it will call the proce
 with **user** as the first argument, an index as the second, and the log level as the third.  The index will
 be a 0-up counter of which **%x** in the format string is being handled.  The fourth and fifth arguments will
 be pointers to the destination and remaining size and function as in **vasqIncSnprintf**.  The processor is
-responsible for adjusting these two values (recall that the terminator is not included in the calculation).
-The processor can write a terminator at the end but it is not necessary.
+responsible for adjusting these two values and for ensuring that the destination remains null-terminated.  To
+be clear, the size must be decreased by the number of *non-null* characters written.
 
 The valid flags are:
 

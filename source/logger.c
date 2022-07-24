@@ -102,6 +102,113 @@ logLevelNamePadding(vasqLogLevel_t level)
     }
 }
 
+static void
+vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, char **dst, size_t remaining,
+             const char *format, va_list args)
+{
+    size_t position = 0;
+    time_t now;
+    struct tm now_fields;
+
+    now = time(NULL);
+    localtime_r(&now, &now_fields);
+
+    for (size_t k = 0; logger->format[k]; k++) {
+        char c = logger->format[k];
+
+        if (c == '%') {
+            switch (logger->format[++k]) {
+                unsigned int padding_length;
+                size_t len, idx;
+                char time_string[30], padding[LOG_LEVEL_NAME_MAX_PADDING + 1];
+
+            case 'M': vasqIncVsnprintf(dst, &remaining, format, args); break;
+
+            case 'p': vasqIncSnprintf(dst, &remaining, "%li", (long)getpid()); break;
+
+#ifdef __linux__
+            case 'T': vasqIncSnprintf(dst, &remaining, "%li", syscall(SYS_gettid)); break;
+#endif
+
+            case 'L': vasqIncSnprintf(dst, &remaining, "%s", logLevelName(level)); break;
+
+            case '_':
+                padding_length = logLevelNamePadding(level);
+                memset(padding, ' ', padding_length);
+                padding[padding_length] = '\0';
+                vasqIncSnprintf(dst, &remaining, "%s", padding);
+                break;
+
+            case 'u': vasqIncSnprintf(dst, &remaining, "%li", (long)now); break;
+
+            case 't':
+                ctime_r(&now, time_string);
+                len = strnlen(time_string, sizeof(time_string));
+                vasqIncSnprintf(dst, &remaining, "%.*s", len - 1,
+                                time_string);  // Don't include the newline character.
+                break;
+
+            case 'h': vasqIncSnprintf(dst, &remaining, "%02i", now_fields.tm_hour); break;
+
+            case 'm': vasqIncSnprintf(dst, &remaining, "%02i", now_fields.tm_min); break;
+
+            case 's': vasqIncSnprintf(dst, &remaining, "%02i", now_fields.tm_sec); break;
+
+            case 'F':
+                for (idx = strlen(file_name); idx > 0; idx--) {
+                    if (file_name[idx] == '/') {
+                        idx++;
+                        goto print_file_name;
+                    }
+                }
+                if (file_name[0] == '/') {  // idx equals 0 here.
+                    idx = 1;
+                }
+print_file_name:
+                vasqIncSnprintf(dst, &remaining, "%s", file_name + idx);
+                break;
+
+            case 'f': vasqIncSnprintf(dst, &remaining, "%s", function_name); break;
+
+            case 'l': vasqIncSnprintf(dst, &remaining, "%u", line_no); break;
+
+            case 'x':
+                if (logger->processor) {
+                    logger->processor(logger->user, position, level, dst, &remaining);
+                }
+                position++;
+                break;
+
+            case '%':
+                if (remaining > 1) {
+                    *((*dst)++) = '%';
+                    **dst = '\0';
+                    remaining--;
+                }
+                break;
+
+            default: __builtin_unreachable();
+            }
+        }
+        else if (remaining > 1) {
+            *((*dst)++) = c;
+            **dst = '\0';
+            remaining--;
+        }
+    }
+}
+
+static void
+logToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, char **dst, size_t remaining,
+            const char *format, ...)
+{
+    va_list args;
+
+    va_start(args, format);
+    vlogToBuffer(logger, level, file_name, function_name, line_no, dst, remaining, format, args);
+    va_end(args);
+}
+
 int
 vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLoggerOptions *options,
                  vasqLogger **logger)
@@ -267,10 +374,8 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
 {
     char output[VASQ_LOGGING_LENGTH];
     char *dst = output;
-    size_t remaining = sizeof(output), position = 0;
+    size_t remaining = sizeof(output);
     int remote_errno;
-    time_t now;
-    struct tm now_fields;
 
     if (!logger || level > logger->level || logger->level == VASQ_LL_NONE) {
         return;
@@ -278,84 +383,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
 
     remote_errno = errno;
 
-    now = time(NULL);
-    localtime_r(&now, &now_fields);
-
-    for (size_t k = 0; logger->format[k]; k++) {
-        char c = logger->format[k];
-
-        if (c == '%') {
-            switch (logger->format[++k]) {
-                unsigned int padding_length;
-                size_t len, idx;
-                char time_string[30], padding[LOG_LEVEL_NAME_MAX_PADDING + 1];
-
-            case 'M': vasqIncVsnprintf(&dst, &remaining, format, args); break;
-
-            case 'p': vasqIncSnprintf(&dst, &remaining, "%li", (long)getpid()); break;
-
-#ifdef __linux__
-            case 'T': vasqIncSnprintf(&dst, &remaining, "%li", syscall(SYS_gettid)); break;
-#endif
-
-            case 'L': vasqIncSnprintf(&dst, &remaining, "%s", logLevelName(level)); break;
-
-            case '_':
-                padding_length = logLevelNamePadding(level);
-                memset(padding, ' ', padding_length);
-                padding[padding_length] = '\0';
-                vasqIncSnprintf(&dst, &remaining, "%s", padding);
-                break;
-
-            case 'u': vasqIncSnprintf(&dst, &remaining, "%li", (long)now); break;
-
-            case 't':
-                ctime_r(&now, time_string);
-                len = strnlen(time_string, sizeof(time_string));
-                vasqIncSnprintf(&dst, &remaining, "%.*s", len - 1,
-                                time_string);  // Don't include the newline character.
-                break;
-
-            case 'h': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_hour); break;
-
-            case 'm': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_min); break;
-
-            case 's': vasqIncSnprintf(&dst, &remaining, "%02i", now_fields.tm_sec); break;
-
-            case 'F':
-                for (idx = strlen(file_name); idx > 0; idx--) {
-                    if (file_name[idx] == '/') {
-                        idx++;
-                        goto print_file_name;
-                    }
-                }
-                if (file_name[0] == '/') {  // idx equals 0 here.
-                    idx = 1;
-                }
-print_file_name:
-                vasqIncSnprintf(&dst, &remaining, "%s", file_name + idx);
-                break;
-
-            case 'f': vasqIncSnprintf(&dst, &remaining, "%s", function_name); break;
-
-            case 'l': vasqIncSnprintf(&dst, &remaining, "%u", line_no); break;
-
-            case 'x':
-                if (logger->processor) {
-                    logger->processor(logger->user, position, level, &dst, &remaining);
-                }
-                position++;
-                break;
-
-            case '%': vasqIncSnprintf(&dst, &remaining, "%%"); break;
-
-            default: __builtin_unreachable();
-            }
-        }
-        else {
-            vasqIncSnprintf(&dst, &remaining, "%c", c);
-        }
-    }
+    vlogToBuffer(logger, level, file_name, function_name, line_no, &dst, remaining, format, args);
 
     if (write(logger->fd, output, dst - output) < 0) {
         NO_OP;
@@ -404,7 +432,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
 #define HEXDUMP_BUFFER_SIZE (NUM_HEXDUMP_LINES * HEXDUMP_LINE_LENGTH + 250)
 
     const unsigned char *bytes = data;
-    char output[HEXDUMP_BUFFER_SIZE];
+    char output[VASQ_LOGGING_LENGTH + HEXDUMP_BUFFER_SIZE];
     char *dst = output;
     int remote_errno;
     size_t actual_dump_size, remaining = sizeof(output);
@@ -420,8 +448,9 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
 
     remote_errno = errno;
 
-    vasqLogStatement(logger, dump_level, file_name, function_name, line_no, "%s (%zu byte%s):", name, size,
-                     (size == 1) ? "" : "s");
+    logToBuffer(logger, dump_level, file_name, function_name, line_no, &dst, remaining,
+                "%s (%zu bytes%s):", name, size, (size == 1) ? "" : "s");
+    remaining -= (dst - output);
 
     actual_dump_size = MIN(size, VASQ_HEXDUMP_SIZE);
     for (size_t k = 0; k < actual_dump_size; k += VASQ_HEXDUMP_WIDTH) {

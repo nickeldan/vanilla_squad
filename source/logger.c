@@ -127,7 +127,7 @@ vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, 
             case 'p': vasqIncSnprintf(dst, &remaining, "%li", (long)getpid()); break;
 
 #ifdef __linux__
-            case 'T': vasqIncSnprintf(dst, &remaining, "%li", syscall(SYS_gettid)); break;
+            case 'T': vasqIncSnprintf(dst, &remaining, "%li", syscall(__NR_gettid)); break;
 #endif
 
             case 'L': vasqIncSnprintf(dst, &remaining, "%s", logLevelName(level)); break;

@@ -1,3 +1,6 @@
+6.0.1:
+    - Replaced the macro SYS_gettid with __NR_gettid.
+
 6.0.0:
     - Log processors are now required to leave the buffer null-terminated.
     - vasqHexDump now only makes one call to write.

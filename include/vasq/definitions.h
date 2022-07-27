@@ -9,7 +9,7 @@
 /**
  * @brief Current version of the library.
  */
-#define VASQ_VERSION "6.0.0"
+#define VASQ_VERSION "6.0.1"
 
 #ifndef NO_OP
 #define NO_OP ((void)0)

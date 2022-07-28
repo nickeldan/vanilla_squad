@@ -449,7 +449,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
     remote_errno = errno;
 
     logToBuffer(logger, dump_level, file_name, function_name, line_no, &dst, remaining,
-                "%s (%zu bytes%s):", name, size, (size == 1) ? "" : "s");
+                "%s (%zu byte%s):", name, size, (size == 1) ? "" : "s");
     remaining -= (dst - output);
 
     actual_dump_size = MIN(size, VASQ_HEXDUMP_SIZE);

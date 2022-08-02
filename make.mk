@@ -25,7 +25,7 @@ include $(VASQ_DEPS_FILE)
 endif
 
 $(VASQ_SHARED_LIBRARY): $(VASQ_OBJECT_FILES)
-	$(CC) -shared -o $@ $^
+	$(CC) $(LDFLAGS) -shared -o $@ $^
 
 $(VASQ_STATIC_LIBRARY): $(VASQ_OBJECT_FILES)
 	$(AR) rcs $@ $^

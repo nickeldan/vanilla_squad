@@ -14,28 +14,38 @@
 /**
  * @brief The maximum number of bytes which will be written by a log statement.
  */
+#ifndef VASQ_LOGGING_LENGTH
 #define VASQ_LOGGING_LENGTH 1024
+#endif
 
 /**
  * @brief The maximum number of bytes displayed by a hex dump.  Any bytes past this limit are replaced by an
  * ellipsis.
  */
+#ifndef VASQ_HEXDUMP_SIZE
 #define VASQ_HEXDUMP_SIZE 1024
+#endif
 
 /**
  * @brief The width of hex dumps.  Must divide into VASQ_HEXDUMP_SIZE.
  */
+#ifndef VASQ_HEXDUMP_WIDTH
 #define VASQ_HEXDUMP_WIDTH 16
+#endif
 
 /**
  * @brief The log level which displays the creation and exiting of processes.
  */
+#ifndef VASQ_LL_PROCESS
 #define VASQ_LL_PROCESS VASQ_LL_DEBUG
+#endif
 
 /**
  * @brief The log level which displays the setting of a logger's log level.
  */
+#ifndef VASQ_LL_LEVEL_CHANGE
 #define VASQ_LL_LEVEL_CHANGE VASQ_LL_DEBUG
+#endif
 
 /**
  * @brief Causes the PLACEHOLDER() macro to generate an error when used even if DEBUG or

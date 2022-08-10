@@ -1,9 +1,5 @@
 *.o
 *.so
 *.a
+env
 deps.mk
-logger_test
-snprintf_test
-assert_test
-README.pdf
-.vscode

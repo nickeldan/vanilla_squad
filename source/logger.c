@@ -459,7 +459,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
         unsigned int line_length;
         char print_buffer[VASQ_HEXDUMP_WIDTH];
 
-        vasqIncSnprintf(&dst, &remaining, "\t%04x  ", k);
+        vasqIncSnprintf(&dst, &remaining, "\t%04x\t", k);
 
         line_length = MIN(actual_dump_size - k, VASQ_HEXDUMP_WIDTH);
         for (unsigned int j = 0; j < line_length; j++) {
@@ -475,7 +475,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
 
             print_buffer[j] = safeIsPrint(c) ? c : '.';
         }
-        vasqIncSnprintf(&dst, &remaining, "    %.*s\n", line_length, print_buffer);
+        vasqIncSnprintf(&dst, &remaining, "\t%.*s\n", line_length, print_buffer);
     }
 
     if (size > actual_dump_size) {

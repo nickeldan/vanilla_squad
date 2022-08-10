@@ -22,7 +22,7 @@ _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY)
 
 format:
 	find . -name '*.[hc]' -print0 | xargs -0 -n 1 clang-format -i
-	find tests -name '*.py' -print0 | xargs -0 -n 1 black -l 110
+	find tests -name '*.py' -print0 | xargs -0 -n 1 black -q -l 110
 
 install: /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY)) $(foreach file,$(VASQ_HEADER_FILES),/usr/local/include/vasq/$(notdir $(file)))
 

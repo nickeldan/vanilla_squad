@@ -1,7 +1,7 @@
 TESTS := $(patsubst $(TEST_DIR)/test_%.c,$(TEST_DIR)/%,$(wildcard $(TEST_DIR)/test_*.c))
 
 $(TEST_DIR)/%: $(TEST_DIR)/test_%.c $(VASQ_STATIC_LIBRARY)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) $(VASQ_INCLUDE_FLAGS) -o $@ $^
 
 tests: $(TESTS) $(wildcard $(TEST_DIR)/*.py)
 	pytest $(TEST_DIR)

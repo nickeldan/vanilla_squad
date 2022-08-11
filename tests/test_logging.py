@@ -119,7 +119,12 @@ def test_format_percent():
     assert p.stdout == "%"
 
 
-@pytest.mark.parametrize("data", (b"", b"a", b"hello", bytes(range(256)), bytes(range(256))*16))
+def test_format_bad():
+    p = subprocess.run([FORMAT_EXECUTABLE, "%v"], stdout=subprocess.PIPE, encoding="utf-8")
+    assert p.returncode == 2
+
+
+@pytest.mark.parametrize("data", (b"", b"a", b"hello", bytes(range(256)), bytes(range(256)) * 16))
 def test_hexdump(data):
     with tempfile.TemporaryFile() as f:
         f.write(data)

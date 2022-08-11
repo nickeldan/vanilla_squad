@@ -313,8 +313,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
  *
  * @return The same return value as malloc.
  */
-void *
-vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
+void *__attribute__((deprecated)) vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
 
 /**
  * @brief Wrap vasqMalloc by automatically supplying the file name, function name, and line number.
@@ -335,7 +334,7 @@ vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size);
  *
  * @return The same return value as calloc.
  */
-void *
+void *__attribute__((deprecated))
 vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size);
 
 /**
@@ -357,7 +356,7 @@ vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t siz
  *
  * @return The same return value as realloc.
  */
-void *
+void *__attribute__((deprecated))
 vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size);
 
 /**
@@ -378,8 +377,7 @@ vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size)
  *
  * @return The same return value as fork.
  */
-pid_t
-vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
+pid_t __attribute__((deprecated)) vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
 
 /**
  * @brief Wrap vasqFork by automatically supplying the file name, function name, and line number.
@@ -399,8 +397,8 @@ vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL);
  * @param value The value passed to exit/_exit.
  * @param quick If true, _exit is called.  Otherwise, exit is called.
  */
-void
-vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick) __attribute__((noreturn));
+void __attribute__((deprecated)) vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick)
+    __attribute__((noreturn));
 
 /**
  * @brief Wrap vasqExit by automatically supplying the file name, function name, and line number and setting

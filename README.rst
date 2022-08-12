@@ -250,4 +250,14 @@ the specified libraries.
 Configuration
 -------------
 
-include/vasq/config.h contains various parameters which can be set prior to compilation.  
+include/vasq/config.h contains various parameters which can be set prior to compilation.  They can also be
+overridden by preprocessor flags defined in **CFLAGS**.
+
+Testing
+=======
+
+Some basic testing of features can be performed by first installing pytest (e.g., via pip) and then running
+
+.. code-block:: sh
+
+    $ make tests

@@ -9,9 +9,8 @@ import typing
 import pytest
 
 THIS_DIR = pathlib.Path(__file__).parent
-
-FORMAT_EXECUTABLE = THIS_DIR / "format"
-HEXDUMP_EXECUTABLE = THIS_DIR / "hexdump"
+FORMAT_EXECUTABLE = str(THIS_DIR / "format")
+HEXDUMP_EXECUTABLE = str(THIS_DIR / "hexdump")
 
 DATE_PATTERN = re.compile(r"[A-Z][a-z]{2} [A-Z][a-z]{2} \d{2} \d{2}:\d{2}:\d{2} \d{4}$")
 HEXDUMP_HEADER_PATTERN = re.compile(r"stdin \((\d+) bytes?\):$")
@@ -151,7 +150,7 @@ def test_hexdump(data):
         match = HEXDUMP_PATTERN.match(line)
         assert match is not None
         assert int(match.group(1), 16) == HEXDUMP_LINE_LENGTH * k
-        line_data = bytes.fromhex("".join(match.group(2).split(" ")))
+        line_data = bytes.fromhex(match.group(2).replace(" ", ""))
         line_ascii = match.group(3)
         line_encode = "".join(encode_data(line_data))
         assert line_encode == line_ascii

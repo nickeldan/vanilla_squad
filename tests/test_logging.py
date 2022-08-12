@@ -29,6 +29,12 @@ def encode_data(data: bytes) -> typing.Iterator[str]:
             yield "."
 
 
+def test_format_empty():
+    p = subprocess.run([FORMAT_EXECUTABLE, ""], stdout=subprocess.PIPE, encoding="utf-8")
+    assert p.returncode == 0
+    assert p.stdout == ""
+
+
 def test_format_message():
     p = subprocess.run([FORMAT_EXECUTABLE, "%M"], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 0
@@ -107,15 +113,22 @@ def test_format_function_name():
 
 
 def test_format_line_number():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%l"], stdout=subprocess.PIPE, encoding="utf-8")
+    p = subprocess.run([FORMAT_EXECUTABLE, "%l\n"], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 0
-    assert int(p.stdout) > 0
+    lines = p.stdout.split("\n")
+    assert int(lines[1]) == int(lines[0]) + 2
 
 
 def test_format_percent():
     p = subprocess.run([FORMAT_EXECUTABLE, "%%"], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 0
     assert p.stdout == "%"
+
+
+def test_format_user():
+    p = subprocess.run([FORMAT_EXECUTABLE, "%x%M%x"], stdout=subprocess.PIPE, encoding="utf=8")
+    assert p.returncode == 0
+    assert p.stdout == "0-1Check1-2"
 
 
 def test_format_bad():

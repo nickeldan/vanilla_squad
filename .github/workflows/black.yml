@@ -8,16 +8,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  check-format:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - uses: actions/setup-python@v1
         with:
           python-version: 3.7
-      - name: Install black
-        run: pip install black
-      - name: Run black
-        run: black --check -l 110 tests
+      - run: pip install black
+      - run: black --check -l 110 tests

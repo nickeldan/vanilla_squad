@@ -1,0 +1,38 @@
+name: make_and_test
+
+on:
+  push:
+    branches:
+      - "**"
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: gcc:latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: make
+      - run: mkdir -p artifacts && cp libvanillasquad.a artifacts
+      - uses: actions/upload-artifact@master
+        with:
+          name: static-library
+          path: artifacts
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@master
+        with:
+          name: static-library
+          path: artifacts
+      - run: mv artifacts/libvanillasquad.a .
+      - uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - run: pip install pytest
+      - run: make tests

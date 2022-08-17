@@ -3,8 +3,8 @@ Vanilla Squad
 =============
 
 :Author: Daniel Walker
-:Version: 6.0.2
-:Date: 2022-07-28
+:Version: 6.0.3
+:Date: 2022-08-16
 
 Overview
 ========
@@ -178,7 +178,7 @@ logging functions, will do nothing.  Passing **NULL** as the logger to the loggi
 nothing happening (NOT an error).
 
 There are various other functions provided by include/vasq/logger.h, such as a hex dumper (which prints at
-the DEBUG level) and wrappers around **malloc**, **fork**, and **perror**.
+the DEBUG level) and a wrapper around **assert**.
 
 Logging messages are emitted in a signal-safe manner.  In addition, logging preserves the value of **errno**.
 
@@ -231,7 +231,8 @@ optimization and build the libraries with debugging symbols.
 You can also include Vanilla Squad in a larger project by including make.mk.  Before doing so, however, the
 **VASQ_DIR** variable must be set to the location of the Vanilla Squad directory.  You can also tell make
 where to place the shared and static libraries by defining the **VASQ_LIB_DIR** variable (defaults to
-**VASQ_DIR**).
+**VASQ_DIR**).  Similarly, you can define the **VASQ_OBJ_DIR** variable which tells make where to place the
+object files (defaults to **VASQ_DIR**/source).
 
 make.mk adds a target to the **CLEAN_TARGETS** variable.  This is so that implementing
 

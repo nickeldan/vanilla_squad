@@ -12,9 +12,9 @@ VASQ_INCLUDE_FLAGS := -I$(VASQ_DIR)/include
 VASQ_DEPS_FILE := $(VASQ_DIR)/deps.mk
 DEPS_FILES += $(VASQ_DEPS_FILE)
 
-CLEAN_TARGETS += vasq_clean
+BUILD_DEPS ?= $(if $(MAKECMDGOALS),$(subst clean,,$(MAKECMDGOALS)),yes)
 
-ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(BUILD_DEPS),)
 
 $(VASQ_DEPS_FILE): $(VASQ_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	rm -f $@
@@ -34,3 +34,5 @@ $(VASQ_STATIC_LIBRARY): $(VASQ_OBJECT_FILES)
 
 vasq_clean:
 	@rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES)
+
+CLEAN_TARGETS += vasq_clean

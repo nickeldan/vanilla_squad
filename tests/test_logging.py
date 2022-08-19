@@ -18,27 +18,33 @@ HEXDUMP_PATTERN = re.compile(r"\t([a-f0-9]{4})\t((?:[a-f0-9]{2} )+) *\t(.+)")
 HEXDUMP_ELLIPSIS_PATTERN = re.compile(r"\t\.\.\. \((\d+) more bytes?\)$")
 HEXDUMP_LINE_LENGTH = 16
 
+PRINTABLE_RANGE = range(ord(" "), ord("~") + 1)
+
+FORMAT_OUTPUT_PAIRS = (
+    ("", ""),
+    ("%M", "Check"),
+    ("%L", "INFO"),
+    ("%_", " " * 4),
+    ("%F", "test_format.c"),
+    ("%f", "main"),
+    ("%%", "%"),
+    ("%x%M%x", "0-1Check1-2"),
+)
+
 
 def encode_data(data: bytes) -> typing.Iterator[str]:
-    printable_range = range(ord(" "), ord("~") + 1)
-
     for n in data:
-        if n in printable_range:
+        if n in PRINTABLE_RANGE:
             yield chr(n)
         else:
             yield "."
 
 
-def test_format_empty():
-    p = subprocess.run([FORMAT_EXECUTABLE, ""], stdout=subprocess.PIPE, encoding="utf-8")
+@pytest.mark.parametrize("format_str,output", FORMAT_OUTPUT_PAIRS)
+def test_simple_format(format_str: str, output: str):
+    p = subprocess.run([FORMAT_EXECUTABLE, format_str], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 0
-    assert p.stdout == ""
-
-
-def test_format_message():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%M"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == "Check"
+    assert p.stdout == output
 
 
 def test_format_pid():
@@ -56,18 +62,6 @@ def test_format_tid():
     stdout, _ = p.communicate()
     assert p.returncode == 0
     assert stdout == str(p.pid)
-
-
-def test_format_level():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%L"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == "INFO"
-
-
-def test_format_spacing():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%_"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == " " * 4
 
 
 def test_format_epoch_time():
@@ -100,18 +94,6 @@ def test_format_second():
     assert abs(time.localtime().tm_sec - int(p.stdout)) < 2
 
 
-def test_format_file_name():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%F"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == "test_format.c"
-
-
-def test_format_function_name():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%f"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == "main"
-
-
 def test_format_line_number():
     p = subprocess.run([FORMAT_EXECUTABLE, "%l\n"], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 0
@@ -119,24 +101,24 @@ def test_format_line_number():
     assert int(lines[1]) == int(lines[0]) + 2
 
 
-def test_format_percent():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%%"], stdout=subprocess.PIPE, encoding="utf-8")
-    assert p.returncode == 0
-    assert p.stdout == "%"
-
-
-def test_format_user():
-    p = subprocess.run([FORMAT_EXECUTABLE, "%x%M%x"], stdout=subprocess.PIPE, encoding="utf=8")
-    assert p.returncode == 0
-    assert p.stdout == "0-1Check1-2"
-
-
 def test_format_bad():
     p = subprocess.run([FORMAT_EXECUTABLE, "%v"], stdout=subprocess.PIPE, encoding="utf-8")
     assert p.returncode == 2
 
 
-@pytest.mark.parametrize("data", (b"", b"a", b"hello", bytes(range(256)), bytes(range(256)) * 16))
+def data_samples() -> typing.Iterator[bytes]:
+    yield b""
+    yield b"a"
+    yield b"hello"
+
+    chunk = bytes(range(256))
+    yield chunk
+
+    chunk *= 16
+    yield chunk
+
+
+@pytest.mark.parametrize("data", data_samples())
 def test_hexdump(data):
     with tempfile.TemporaryFile() as f:
         f.write(data)

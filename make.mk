@@ -9,7 +9,7 @@ VASQ_OBJECT_FILES := $(patsubst $(VASQ_DIR)/source/%.c,$(VASQ_OBJ_DIR)/%.o,$(VAS
 VASQ_HEADER_FILES := $(wildcard $(VASQ_DIR)/include/vasq/*.h)
 VASQ_INCLUDE_FLAGS := -I$(VASQ_DIR)/include
 
-VASQ_DEPS_FILE := $(VASQ_DIR)/deps.mk
+VASQ_DEPS_FILE := $(VASQ_OBJ_DIR)/deps.mk
 DEPS_FILES += $(VASQ_DEPS_FILE)
 
 BUILD_DEPS ?= $(if $(MAKECMDGOALS),$(subst clean,,$(MAKECMDGOALS)),yes)

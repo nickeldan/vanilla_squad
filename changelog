@@ -1,3 +1,8 @@
+6.0.4:
+    - Added the format __attribute__ to several printf-like functions.
+    - Added the BUILD_DEPS variable to make.mk.
+    - deps.mk is now written to VASQ_OBJ_DIR.
+
 6.0.3.:
     - Deprecated various logging wrapper functions such as vasqMalloc.
     - Added the use of LDFLAGS and VASQ_OBJ_DIR to make.mk.

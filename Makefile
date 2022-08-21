@@ -10,6 +10,13 @@ endif
 
 all: _all
 
+BUILD_DEPS :=
+ifeq ($(MAKECMDGOALS),clean)
+else ifeq ($(MAKECMDGOALS),format)
+else
+    BUILD_DEPS := yes
+endif
+
 VASQ_DIR := .
 include make.mk
 

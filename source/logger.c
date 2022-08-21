@@ -118,8 +118,8 @@ vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, 
 
         if (c == '%') {
             switch (logger->format[++k]) {
-                unsigned int padding_length;
-                size_t len, idx;
+                unsigned int padding_length, len;
+                size_t idx;
                 char time_string[30], padding[LOG_LEVEL_NAME_MAX_PADDING + 1];
 
             case 'M': vasqIncVsnprintf(dst, remaining, format, args); break;
@@ -438,7 +438,8 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
     char output[VASQ_LOGGING_LENGTH + HEXDUMP_BUFFER_SIZE];
     char *dst = output;
     int remote_errno;
-    size_t actual_dump_size, remaining = sizeof(output);
+    unsigned int actual_dump_size;
+    size_t remaining = sizeof(output);
     vasqLogLevel_t dump_level;
 
     if (!logger) {
@@ -455,7 +456,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
                 "%s (%zu byte%s):", name, size, (size == 1) ? "" : "s");
 
     actual_dump_size = MIN(size, VASQ_HEXDUMP_SIZE);
-    for (size_t k = 0; k < actual_dump_size; k += VASQ_HEXDUMP_WIDTH) {
+    for (unsigned int k = 0; k < actual_dump_size; k += VASQ_HEXDUMP_WIDTH) {
         unsigned int line_length;
         char print_buffer[VASQ_HEXDUMP_WIDTH];
 

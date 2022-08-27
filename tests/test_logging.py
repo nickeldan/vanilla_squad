@@ -22,6 +22,7 @@ PRINTABLE_RANGE = range(ord(" "), ord("~") + 1)
 
 FORMAT_OUTPUT_PAIRS = (
     ("", ""),
+    ("Hello", "Hello"),
     ("%M", "Check"),
     ("%L", "INFO"),
     ("%_", " " * 4),
@@ -54,10 +55,8 @@ def test_format_pid():
     assert stdout == str(p.pid)
 
 
+@pytest.mark.skipif("not sys.platform.startswith('linux')", reason="Feature only supported on Linux")
 def test_format_tid():
-    if not sys.platform.startswith("linux"):
-        pytest.skip()
-
     p = subprocess.Popen([FORMAT_EXECUTABLE, "%T"], stdout=subprocess.PIPE, encoding="utf-8")
     stdout, _ = p.communicate()
     assert p.returncode == 0
@@ -107,15 +106,14 @@ def test_format_bad():
 
 
 def data_samples() -> typing.Iterator[bytes]:
-    yield b""
-    yield b"a"
-    yield b"hello"
+    yield pytest.param(b"", id='b""')
+    yield pytest.param(b"a", id='b"a"')
+    yield pytest.param(b"hello", id='b"hello"')
 
     chunk = bytes(range(256))
-    yield chunk
+    yield pytest.param(chunk, id="chunk")
 
-    chunk *= 16
-    yield chunk
+    yield pytest.param(chunk * 16, id="big chunk")
 
 
 @pytest.mark.parametrize("data", data_samples())

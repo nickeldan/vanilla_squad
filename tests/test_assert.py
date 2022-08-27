@@ -6,5 +6,4 @@ ASSERT_EXECUTABLE = str(THIS_DIR / "assert")
 
 
 def test_assert():
-    p = subprocess.run(ASSERT_EXECUTABLE)
-    assert p.returncode == 0
+    assert subprocess.run(ASSERT_EXECUTABLE).returncode == 0

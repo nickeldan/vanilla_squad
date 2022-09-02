@@ -1,3 +1,7 @@
+6.0.5:
+    - make.mk now creates any necessary directories.
+    - Added an include guard to make.mk.
+
 6.0.4:
     - Added the format __attribute__ to several printf-like functions.
     - Added the BUILD_DEPS variable to make.mk.

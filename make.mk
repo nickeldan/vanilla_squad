@@ -1,3 +1,6 @@
+ifndef VASQ_MK
+VASQ_MK :=
+
 VASQ_LIB_DIR ?= $(VASQ_DIR)
 VASQ_OBJ_DIR ?= $(VASQ_DIR)/source
 
@@ -39,3 +42,5 @@ vasq_clean:
 	@rm -f $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY) $(VASQ_OBJECT_FILES)
 
 CLEAN_TARGETS += vasq_clean
+
+endif

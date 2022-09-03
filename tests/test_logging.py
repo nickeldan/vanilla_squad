@@ -12,7 +12,7 @@ THIS_DIR = pathlib.Path(__file__).parent
 FORMAT_EXECUTABLE = str(THIS_DIR / "format")
 HEXDUMP_EXECUTABLE = str(THIS_DIR / "hexdump")
 
-DATE_PATTERN = re.compile(r"[A-Z][a-z]{2} [A-Z][a-z]{2} \d{2} \d{2}:\d{2}:\d{2} \d{4}$")
+DATE_PATTERN = re.compile(r"[A-Z][a-z]{2} [A-Z][a-z]{2} [01 ]\d \d{2}:\d{2}:\d{2} \d{4}$")
 HEXDUMP_HEADER_PATTERN = re.compile(r"stdin \((\d+) bytes?\):$")
 HEXDUMP_PATTERN = re.compile(r"\t([a-f0-9]{4})\t((?:[a-f0-9]{2} )+) *\t(.+)")
 HEXDUMP_ELLIPSIS_PATTERN = re.compile(r"\t\.\.\. \((\d+) more bytes?\)$")

@@ -247,6 +247,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
 
                 default:
                     free(*logger);
+                    *logger = NULL;
                     errno = local_errno;
                     return VASQ_RET_DUP_FAIL;
                 }
@@ -268,7 +269,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
     (*logger)->processor = options->processor;
     (*logger)->user = options->user;
     (*logger)->hex_dump_info = !!(options->flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO);
-    vasqSetLoggerLevel(*logger, level);
+    (*logger)->level = level;
 
     if (options->flags & VASQ_LOGGER_FLAG_CLOEXEC) {
         int flags;
@@ -277,6 +278,7 @@ vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLog
         if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
             local_errno = errno;
             vasqLoggerFree(*logger);
+            *logger = NULL;
             errno = local_errno;
             return VASQ_RET_FCNTL_FAIL;
         }
@@ -326,13 +328,9 @@ vasqLoggerLevel(const vasqLogger *logger)
 void
 vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level)
 {
-    if (!logger) {
-        return;
+    if (logger) {
+        logger->level = level;
     }
-
-    logger->level = level;
-    vasqLogStatement(logger, VASQ_LL_LEVEL_CHANGE, VASQ_CONTEXT_PARAMS, "Log level set to %s",
-                     logLevelName(level));
 }
 
 void

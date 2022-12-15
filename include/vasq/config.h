@@ -41,13 +41,6 @@
 #endif
 
 /**
- * @brief The log level which displays the setting of a logger's log level.
- */
-#ifndef VASQ_LL_LEVEL_CHANGE
-#define VASQ_LL_LEVEL_CHANGE VASQ_LL_DEBUG
-#endif
-
-/**
  * @brief Causes the PLACEHOLDER() macro to generate an error when used even if DEBUG or
  * VASQ_ALLOW_PLACEHOLDER are defined.
  */

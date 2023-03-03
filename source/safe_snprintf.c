@@ -55,6 +55,16 @@ vasqSafeSnprintf(char *buffer, size_t size, const char *format, ...)
     return ret;
 }
 
+#define COPY_STRING(string)                              \
+    do {                                                 \
+        for (const char *word = string; *word; word++) { \
+            *(buffer++) = *word;                         \
+            if (--size == 0) {                           \
+                goto done;                               \
+            }                                            \
+        }                                                \
+    } while (0)
+
 ssize_t
 vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
 {
@@ -77,10 +87,7 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                 size--;
             }
             else if (c == 's') {
-                for (const char *string = va_arg(args, const char *); *string && size > 0; string++) {
-                    *(buffer++) = *string;
-                    size--;
-                }
+                COPY_STRING(va_arg(args, const char *));
             }
             else if (c == '.') {
                 unsigned int length;
@@ -196,22 +203,22 @@ vasqSafeVsnprintf(char *buffer, size_t size, const char *format, va_list args)
                     }
                 }
                 else if (c == 'p') {
+                    void *ptr;
+
                     if (is_long || is_long_long) {
                         return -1;
                     }
 
-                    *(buffer++) = '0';
-                    if (--size == 0) {
-                        goto done;
+                    ptr = va_arg(args, void *);
+                    if (!ptr) {
+                        COPY_STRING("(nil)");
+                        continue;
                     }
 
-                    *(buffer++) = 'x';
-                    if (--size == 0) {
-                        goto done;
-                    }
+                    COPY_STRING("0x");
 
                     show_hex = true;
-                    value = (uintptr_t)va_arg(args, void *);
+                    value = (uintptr_t)ptr;
                 }
                 else if (c == 'x' || c == 'X') {
                     show_hex = true;
@@ -274,6 +281,8 @@ done:
     *buffer = '\0';
     return buffer - start;
 }
+
+#undef COPY_STRING
 
 ssize_t
 vasqIncSnprintf(char **output, size_t *capacity, const char *format, ...)

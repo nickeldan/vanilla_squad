@@ -1,18 +1,17 @@
-name: Check format
+name: Run tests
 
 on:
   push:
     branches:
       - "**"
-
+  
   workflow_dispatch:
 
 jobs:
-  check-format:
+  test:
     runs-on: ubuntu-latest
-
+    container:
+      image: nickeldan/scrutiny:0.4.0
     steps:
       - uses: actions/checkout@v3
-      - uses: jidicula/clang-format-action@v4.6.2
-        with:
-          clang-format-version: '14'
+      - run: make tests

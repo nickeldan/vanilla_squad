@@ -9,7 +9,7 @@
 /**
  * @brief Current version of the library.
  */
-#define VASQ_VERSION "6.0.8"
+#define VASQ_VERSION "7.0.0"
 
 #ifndef NO_OP
 #define NO_OP ((void)0)
@@ -24,31 +24,21 @@
 #endif
 
 #ifndef ARRAY_LENGTH
-#define ARRAY_LENGTH(x) (sizeof(x) / sizeof((x)[0]))
+#define ARRAY_LENGTH(arr) (sizeof(arr) / sizeof((arr)[0]))
 #endif
 
-/**
- * @brief Error values that some library functions can return.
- */
-enum vasqRetValue {
-    VASQ_RET_OK = 0,
-    VASQ_RET_USAGE,
-    VASQ_RET_BAD_FORMAT,
-    VASQ_RET_OUT_OF_MEMORY,
-    VASQ_RET_DUP_FAIL,
-    VASQ_RET_FCNTL_FAIL,
+#ifdef __GNUC__
 
-    VASQ_RET_UNUSED,
-};
+#define VASQ_NONNULL(...) __attribute__((nonnull(__VA_ARGS__)))
+#define VASQ_FORMAT(pos)  __attribute__((format(printf, pos, pos + 1)))
+#define VASQ_MALLOC       __attribute__((malloc))
 
-/**
- * @brief Convert an error value (see enum vasqRetValue) into a string.
- *
- * @param errnum The error value.
- *
- * @return The string.
- */
-const char *
-vasqErrorString(int errnum) __attribute__((pure));
+#else
+
+#define VASQ_NONNULL(...)
+#define VASQ_FORMAT(pos)
+#define VASQ_MALLOC
+
+#endif
 
 #endif  // VANILLA_SQUAD_DEFINITIONS_H

@@ -279,6 +279,16 @@ test_snprintf_p(void)
 }
 
 void
+test_snprintf_n(void)
+{
+    unsigned int num;
+    char buffer[10];
+
+    SCR_ASSERT_EQ(vasqSafeSnprintf(buffer, sizeof(buffer), "Check%n", &num), 5);
+    SCR_ASSERT_EQ(num, 5);
+}
+
+void
 test_snprintf_zero_padding(void)
 {
     char buffer[10];

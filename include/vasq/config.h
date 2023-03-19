@@ -34,13 +34,6 @@
 #endif
 
 /**
- * @brief The log level which displays the creation and exiting of processes.
- */
-#ifndef VASQ_LL_PROCESS
-#define VASQ_LL_PROCESS VASQ_LL_DEBUG
-#endif
-
-/**
  * @brief Causes the PLACEHOLDER() macro to generate an error when used even if DEBUG or
  * VASQ_ALLOW_PLACEHOLDER are defined.
  */

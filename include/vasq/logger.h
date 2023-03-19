@@ -15,6 +15,8 @@
 
 #include "definitions.h"
 
+#ifndef VASQ_NO_LOGGING
+
 /**
  * @brief Logging levels
  */
@@ -27,8 +29,6 @@ typedef enum vasqLogLevel {
     VASQ_LL_INFO,
     VASQ_LL_DEBUG,
 } vasqLogLevel;
-
-#ifndef VASQ_NO_LOGGING
 
 #define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
 #define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__
@@ -292,12 +292,41 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
  */
 #define VASQ_HEXDUMP(logger, name, data, size) vasqHexDump(logger, VASQ_CONTEXT_PARAMS, name, data, size)
 
-#else  // VASQ_NO_LOGGING
+#ifdef DEBUG
 
-#define vasqLoggerCreate(...)             VASQ_RET_OK
-#define vasqLoggerFree(logger)            NO_OP
-#define vasqLoggerLevel(logger)           VASQ_LL_NONE
-#define vasqSetLoggerLevel(logger, level) NO_OP
+#ifdef VASQ_TEST_ASSERT
+
+extern bool _vasq_abort_caught;
+#define _VASQ_ABORT()              \
+    do {                           \
+        _vasq_abort_caught = true; \
+    } while (0)
+
+#else  // VASQ_TEST_ABORT
+
+#define _VASQ_ABORT() abort()
+
+#endif  // VASQ_TEST_ABORT
+
+/**
+ * @brief Verifies than an expression is true and, if not, logs a critical message and calls abort().
+ * Resolves to a no op if the DEBUG preprocessor variable is not defined.
+ */
+#define VASQ_ASSERT(logger, expr)                                 \
+    do {                                                          \
+        if (!(expr)) {                                            \
+            VASQ_CRITICAL(logger, "Assertion failed: %s", #expr); \
+            _VASQ_ABORT();                                        \
+        }                                                         \
+    } while (0)
+
+#else  // DEBUG
+
+#define VASQ_ASSERT(logger, expr) NO_OP
+
+#endif  // DEBUG
+
+#else  // VASQ_NO_LOGGING
 
 #define vasqLogStatement(...)  NO_OP
 #define vasqVLogStatement(...) NO_OP
@@ -314,47 +343,8 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
 #define vasqVRawLog(...)       NO_OP
 #define vasqHexDump(...)       NO_OP
 #define VASQ_HEXDUMP(...)      NO_OP
+#define VASQ_ASSERT(...)       NO_OP
 
 #endif  // VASQ_NO_LOGGING
-
-#ifdef DEBUG
-
-#ifdef VASQ_TEST_ASSERT
-
-extern bool _vasq_abort_caught;
-#define _VASQ_ABORT()              \
-    do {                           \
-        _vasq_abort_caught = true; \
-    } while (0)
-#define _VASQ_CLEAR_ABORT()         \
-    do {                            \
-        _vasq_abort_caught = false; \
-    } while (0)
-
-#else  // VASQ_TEST_ABORT
-
-#define _VASQ_ABORT()       abort()
-#define _VASQ_CLEAR_ABORT() NO_OP
-
-#endif  // VASQ_TEST_ABORT
-
-/**
- * @brief Verifies than an expression is true and, if not, logs a critical message and calls abort().
- * Resolves to a no op if the DEBUG preprocessor variable is not defined.
- */
-#define VASQ_ASSERT(logger, expr)                                 \
-    do {                                                          \
-        _VASQ_CLEAR_ABORT();                                      \
-        if (!(expr)) {                                            \
-            VASQ_CRITICAL(logger, "Assertion failed: %s", #expr); \
-            _VASQ_ABORT();                                        \
-        }                                                         \
-    } while (0)
-
-#else  // DEBUG
-
-#define VASQ_ASSERT(logger, expr) NO_OP
-
-#endif  // DEBUG
 
 #endif  // VANILLA_SQUAD_LOGGER_H

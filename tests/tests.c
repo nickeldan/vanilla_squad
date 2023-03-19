@@ -28,6 +28,7 @@
     M(snprintf_llx)                \
     M(snprintf_llX)                \
     M(snprintf_p)                  \
+    M(snprintf_n)                  \
     M(snprintf_zero_padding)       \
     M(snprintf_space_padding)      \
     M(inc_snprintf)                \

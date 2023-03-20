@@ -1,14 +1,6 @@
-/**
- * @file definitions.h
- * @author Daniel Walker
- * @brief Provides common definitions for the library.
- */
 #ifndef VANILLA_SQUAD_DEFINITIONS_H
 #define VANILLA_SQUAD_DEFINITIONS_H
 
-/**
- * @brief Current version of the library.
- */
 #define VASQ_VERSION "7.0.0"
 
 #ifndef NO_OP

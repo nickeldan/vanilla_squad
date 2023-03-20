@@ -103,8 +103,8 @@ logLevelNamePadding(vasqLogLevel level)
 }
 
 static void
-vlogToBuffer(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, char **dst, size_t *remaining,
-             const char *format, va_list args)
+vlogToBuffer(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+             unsigned int line_no, char **dst, size_t *remaining, const char *format, va_list args)
 {
     size_t position = 0;
     time_t now;
@@ -203,8 +203,8 @@ print_file_name:
 }
 
 static void
-logToBuffer(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, char **dst, size_t *remaining,
-            const char *format, ...)
+logToBuffer(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+            unsigned int line_no, char **dst, size_t *remaining, const char *format, ...)
 {
     va_list args;
 
@@ -333,7 +333,7 @@ vasqLoggerFree(vasqLogger *logger)
 }
 
 vasqLogLevel
-vasqLoggerLevel(const vasqLogger *logger)
+vasqLoggerLevel(vasqLogger *logger)
 {
     return logger ? logger->level : VASQ_LL_NONE;
 }
@@ -347,7 +347,8 @@ vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel level)
 }
 
 void
-vasqLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, const char *format, ...)
+vasqLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                 unsigned int line_no, const char *format, ...)
 {
     va_list args;
 
@@ -357,8 +358,8 @@ vasqLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL
 }
 
 void
-vasqVLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, const char *format,
-                  va_list args)
+vasqVLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                  unsigned int line_no, const char *format, va_list args)
 {
     char output[VASQ_LOGGING_LENGTH];
     char *dst = output;
@@ -376,7 +377,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DEC
 }
 
 void
-vasqRawLog(const vasqLogger *logger, const char *format, ...)
+vasqRawLog(vasqLogger *logger, const char *format, ...)
 {
     va_list args;
 
@@ -386,7 +387,7 @@ vasqRawLog(const vasqLogger *logger, const char *format, ...)
 }
 
 void
-vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
+vasqVRawLog(vasqLogger *logger, const char *format, va_list args)
 {
     int remote_errno;
     ssize_t written;
@@ -403,7 +404,8 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
 }
 
 void
-vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size)
+vasqHexDump(vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+            const char *name, const void *data, size_t size)
 {
 #define NUM_HEXDUMP_LINES   (VASQ_HEXDUMP_SIZE / VASQ_HEXDUMP_WIDTH)
 #define HEXDUMP_LINE_LENGTH (VASQ_HEXDUMP_WIDTH * 4 + 10)

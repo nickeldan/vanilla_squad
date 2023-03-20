@@ -21,16 +21,15 @@
  * @brief Logging levels
  */
 typedef enum vasqLogLevel {
-    VASQ_LL_NONE = -1,
-    VASQ_LL_ALWAYS,
-    VASQ_LL_CRITICAL,
-    VASQ_LL_ERROR,
-    VASQ_LL_WARNING,
-    VASQ_LL_INFO,
-    VASQ_LL_DEBUG,
+    VASQ_LL_NONE = -1, /**< None */
+    VASQ_LL_ALWAYS,    /**< Always */
+    VASQ_LL_CRITICAL,  /**< Critical */
+    VASQ_LL_ERROR,     /**< Error */
+    VASQ_LL_WARNING,   /**< Warning */
+    VASQ_LL_INFO,      /**< Info */
+    VASQ_LL_DEBUG,     /**< Debug */
 } vasqLogLevel;
 
-#define VASQ_CONTEXT_DECL   const char *file_name, const char *function_name, unsigned int line_no
 #define VASQ_CONTEXT_PARAMS __FILE__, __func__, __LINE__
 
 typedef struct vasqLogger vasqLogger;
@@ -78,9 +77,9 @@ vasqHandlerCleanup(void *user);
  * @brief Handles the outputting of log messages.
  */
 typedef struct vasqLoggerHandler {
-    vasqHandlerFunc *func;        /// Called whenever log messages are generated.
-    vasqHandlerCleanup *cleanup;  /// Called when the logger is freed.
-    void *user;                   /// User-provided data.
+    vasqHandlerFunc *func;       /**< Called whenever log messages are generated. */
+    vasqHandlerCleanup *cleanup; /**< Called when the logger is freed. */
+    void *user;                  /**< User-provided data. */
 } vasqHandler;
 
 /**
@@ -112,11 +111,13 @@ vasqDataProcessor(void *user, size_t idx, vasqLogLevel level, char **dst, size_t
 
 /**
  * @brief Options passed to vasqLoggerCreate.
+ *
+ * @note Currently, the only available flag is VASQ_LOGGER_FLAG_HEX_DUMP_INFO.
  */
 typedef struct vasqLoggerOptions {
-    vasqDataProcessor *processor;  /// The processor to be used for %x format tokens.
-    void *user;                    /// User-provided data.
-    unsigned int flags;            /// Bitwise-or-combined flags.
+    vasqDataProcessor *processor; /**< The processor to be used for %x format tokens. */
+    void *user;                   /**< User-provided data. */
+    unsigned int flags;           /**< Bitwise-or-combined flags. */
 } vasqLoggerOptions;
 
 #define VASQ_LOGGER_FLAG_CLOEXEC       0x00000001  /// Set FD_CLOEXEC on a file descriptor.
@@ -156,7 +157,7 @@ vasqLoggerFree(vasqLogger *logger);
  * @return The maximum log level if logger is not NULL and VASQ_LL_NONE otherwise.
  */
 vasqLogLevel
-vasqLoggerLevel(const vasqLogger *logger);
+vasqLoggerLevel(vasqLogger *logger);
 
 /**
  * @brief Set the maximum log level for a logger.
@@ -180,8 +181,8 @@ vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel level);
  * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
  */
 void
-vasqLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, const char *format, ...)
-    VASQ_FORMAT(6);
+vasqLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                 unsigned int line_no, const char *format, ...) VASQ_FORMAT(6);
 
 /**
  * @brief Emit a message at the ALWAYS level.
@@ -255,8 +256,8 @@ vasqLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL
  * @brief Same as vasqLogStatement but takes a va_list instead of variable arguments.
  */
 void
-vasqVLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, const char *format,
-                  va_list args) VASQ_NONNULL(6);
+vasqVLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                  unsigned int line_no, const char *format, va_list args) VASQ_NONNULL(6);
 
 /**
  * @brief Write directly to a logger's descriptor.
@@ -265,13 +266,13 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DEC
  * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
  */
 void
-vasqRawLog(const vasqLogger *logger, const char *format, ...) VASQ_FORMAT(2);
+vasqRawLog(vasqLogger *logger, const char *format, ...) VASQ_FORMAT(2);
 
 /**
  * @brief Same as vasqRawLog but takes a va_list insead of variable arguments.
  */
 void
-vasqVRawLog(const vasqLogger *logger, const char *format, va_list args) VASQ_NONNULL(2);
+vasqVRawLog(vasqLogger *logger, const char *format, va_list args) VASQ_NONNULL(2);
 
 /**
  * @brief Display a hex dump of a section of memory.  The dump appears at the DEBUG level.
@@ -285,8 +286,8 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args) VASQ_NON
  * @param size The number of bytes to display.
  */
 void
-vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size)
-    VASQ_NONNULL(5, 6);
+vasqHexDump(vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+            const char *name, const void *data, size_t size) VASQ_NONNULL(5, 6);
 
 /**
  * @brief Wrap vasqHexDump by automatically supplying the file name, function name, and line number.

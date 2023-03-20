@@ -26,9 +26,11 @@ test_logger_null_logger(void)
 }
 
 static void
-handler_func(void *user, const char *text, size_t size)
+handler_func(void *user, vasqLogLevel level, const char *text, size_t size)
 {
     int *num_ptr = user;
+
+    SCR_ASSERT_EQ(level, VASQ_LL_INFO);
 
     SCR_ASSERT_STR_EQ(text, "Check");
     SCR_ASSERT_EQ(size, 5);
@@ -75,9 +77,11 @@ test_logger_handler_no_func(void)
 }
 
 static void
-write_to_ctx(void *user, const char *text, size_t size)
+write_to_ctx(void *user, vasqLogLevel level, const char *text, size_t size)
 {
     struct test_ctx *ctx = user;
+
+    (void)level;
 
     memset(ctx, 0, sizeof(*ctx));
     size = MIN(size, sizeof(ctx->buffer) - 1);
@@ -510,13 +514,29 @@ test_logger_percent(void)
     vasqLoggerFree(logger);
 }
 
+static void
+raw_handler(void *user, vasqLogLevel level, const char *text, size_t size)
+{
+    SCR_ASSERT_EQ(level, VASQ_LL_NONE);
+
+    write_to_ctx(user, level, text, size);
+}
+
+static vasqLogger *
+create_raw_logger(struct test_ctx *ctx)
+{
+    vasqHandler handler = {.func = raw_handler, .user = ctx};
+
+    return vasqLoggerCreate(VASQ_LL_INFO, "%L: %M", &handler, NULL);
+}
+
 void
 test_logger_raw(void)
 {
     struct test_ctx ctx;
     vasqLogger *logger;
 
-    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_INFO, "%L: %M", NULL), NULL);
+    SCR_ASSERT_PTR_NEQ(logger = create_raw_logger(&ctx), NULL);
     vasqRawLog(logger, "Check: %i", 5);
     SCR_ASSERT_STR_EQ(ctx.buffer, "Check: 5");
 
@@ -539,7 +559,7 @@ test_logger_vraw(void)
     struct test_ctx ctx;
     vasqLogger *logger;
 
-    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_INFO, "%L: %M", NULL), NULL);
+    SCR_ASSERT_PTR_NEQ(logger = create_raw_logger(&ctx), NULL);
     do_vraw(logger, "Check: %i", 5);
     SCR_ASSERT_STR_EQ(ctx.buffer, "Check: 5");
 

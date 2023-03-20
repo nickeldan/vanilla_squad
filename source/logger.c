@@ -214,9 +214,11 @@ logToBuffer(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DECL, cha
 }
 
 static void
-writeToFd(void *user, const char *text, size_t size)
+writeToFd(void *user, vasqLogLevel level, const char *text, size_t size)
 {
     int fd = (intptr_t)user;
+
+    (void)level;
 
     if (write(fd, text, size) < 0) {
         NO_OP;
@@ -369,7 +371,7 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel level, VASQ_CONTEXT_DEC
 
     remote_errno = errno;
     vlogToBuffer(logger, level, file_name, function_name, line_no, &dst, &remaining, format, args);
-    logger->handler.func(logger->handler.user, output, dst - output);
+    logger->handler.func(logger->handler.user, level, output, dst - output);
     errno = remote_errno;
 }
 
@@ -396,7 +398,7 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
 
     remote_errno = errno;
     written = vasqSafeVsnprintf(output, sizeof(output), format, args);
-    logger->handler.func(logger->handler.user, output, written);
+    logger->handler.func(logger->handler.user, VASQ_LL_NONE, output, written);
     errno = remote_errno;
 }
 
@@ -457,7 +459,7 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
                         (size - actual_dump_size == 1) ? "" : "s");
     }
 
-    logger->handler.func(logger->handler.user, output, dst - output);
+    logger->handler.func(logger->handler.user, dump_level, output, dst - output);
     errno = remote_errno;
 
 #undef NUM_HEXDUMP_LINES

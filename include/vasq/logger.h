@@ -59,11 +59,12 @@ typedef struct vasqLogger vasqLogger;
  * @brief Function type outputting log messages.
  *
  * @param user  User-provided data.
+ * @param level The level of the message.
  * @param text  The message to be printed.
  * @param size  The number of non-null characters in the message.
  */
 typedef void
-vasqHandlerFunc(void *user, const char *text, size_t size);
+vasqHandlerFunc(void *user, vasqLogLevel level, const char *text, size_t size);
 
 /**
  * @brief Function type for cleaning up a handler.

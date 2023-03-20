@@ -63,6 +63,20 @@ vasqSafeSnprintf(buffer, size, "%2x", 10); // " a"
 Logging
 =======
 
+The available logging levels are
+
+```c
+typedef enum vasqLogLevel {
+    VASQ_LL_NONE = -1,
+    VASQ_LL_ALWAYS,
+    VASQ_LL_CRITICAL,
+    VASQ_LL_ERROR,
+    VASQ_LL_WARNING,
+    VASQ_LL_INFO,
+    VASQ_LL_DEBUG,
+} vasqLogLevel;
+```
+
 Handlers
 --------
 
@@ -70,7 +84,7 @@ Every logger need a handler:
 
 ```c
 typedef void
-vasqHandlerFunc(void *user, const char *text, size_t size);
+vasqHandlerFunc(void *user, vasqLogLevel level, const char *text, size_t size);
 
 typedef void
 vasqHandlerCleanup(void *user);
@@ -82,7 +96,7 @@ typedef struct vasqHandler {
 } vasqHandler;
 ```
 
-Whenever a log message is generated, the handler's `func` is called with the handler's `user` as the first argument, the message as the second, and the length of the message as the third.  `text` will actually be null-terminated but `size` saves you from having to determine it yourself.
+Whenever a log message is generated, the handler's `func` is called with the handler's `user` as the first argument, the log level as the second, the message as the third, and the length of the message as the fourth.  `text` will actually be null-terminated but `size` saves you from having to determine it yourself.
 
 Since you'll often want to write logging messages to a file descriptor, you can use
 
@@ -120,21 +134,11 @@ vasqLoggerCreate(
 
 This function returns the logger if successful.  Otherwise, `NULL` is returned and `errno` is set.
 
-The available logging levels are
-
-- `VASQ_LL_NONE`
-- `VASQ_LL_ALWAYS`
-- `VASQ_LL_CRITICAL`
-- `VASQ_LL_ERROR`
-- `VASQ_LL_WARNING`
-- `VASQ_LL_INFO`
-- `VASQ_LL_DEBUG`
-
 `vasqLoggerOptions` is defined by
 
 ```c
 typedef void
-vasqDataProcessor(void *user, size_t idx, vasqLogLevel levcel, char **dst, size_t *remaining);
+vasqDataProcessor(void *user, size_t idx, vasqLogLevel level, char **dst, size_t *remaining);
 
 typedef struct vasqLoggerOptions {
     vasqLoggerDataProcessor *processor; // The processor to be used for %x format tokens.
@@ -208,9 +212,11 @@ void
 vasqVRawLog(const vasqLogger *logger, const char *format, va_list args);
 ```
 
+When performing raw logging, a level of `VASQ_LL_NONE` will be passed to the handler's function.
+
 If the logger's level is set to `VASQ_LL_NONE`, then all logging functions, including the raw logging functions, will do nothing.  Passing `NULL` as the logger to the logging functions also results in nothing happening (NOT an error).
 
-Logging messages are emitted in a signal-safe manner.  In addition, logging preserves the value of `errno`.
+Logging preserves the value of `errno`.
 
 Hex dumping
 -----------
@@ -228,7 +234,7 @@ Outputs:
         0000	54 68 69 73 20 69 73 20 61 20 62 6f 72 69 6e 67 	This is a boring
         0010	20 73 65 6e 74 65 6e 63 65 20 74 68 61 74 20 6e 	 sentence that n
         0020	6f 20 6f 6e 65 20 63 61 72 65 73 20 61 62 6f 75 	o one cares abou
-        0030	74 2e 00
+        0030	74 2e 00                                            t..
 */
 ```
 

@@ -241,15 +241,9 @@ vasqFdHandlerCreate(int fd, unsigned int flags, vasqHandler *handler)
         return -1;
     }
 
-    while ((new_fd = dup(fd)) < 0) {
-        switch (errno) {
-#ifdef EBUSY
-        case EBUSY:
-#endif
-        case EINTR: break;
-
-        default: return -1;
-        }
+    new_fd = dup(fd);
+    if (new_fd < 0) {
+        return -1;
     }
 
     if (flags & VASQ_LOGGER_FLAG_CLOEXEC) {

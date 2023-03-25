@@ -667,7 +667,7 @@ test_logger_fd_handler(void)
 void
 test_logger_fd_handler_cloexec(void)
 {
-    int fd_flags, handler_fd;
+    int fd_flags;
     vasqHandler handler;
     int fds[2];
 
@@ -676,14 +676,13 @@ test_logger_fd_handler_cloexec(void)
     }
 
     SCR_ASSERT_EQ(vasqFdHandlerCreate(fds[1], VASQ_LOGGER_FLAG_CLOEXEC, &handler), 0);
-    handler_fd = (intptr_t)handler.user;
-    fd_flags = fcntl(handler_fd, F_GETFD);
+    fd_flags = fcntl((intptr_t)handler.user, F_GETFD);
     if (fd_flags == -1) {
-        SCR_FAIL("fcntl (F_GETFD): %s", strerror(errno));
+        SCR_FAIL("fcntl: %s", strerror(errno));
     }
     SCR_ASSERT(fd_flags & FD_CLOEXEC);
 
-    close(handler_fd);
+    handler.cleanup(handler.user);
     close(fds[0]);
     close(fds[1]);
 }

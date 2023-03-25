@@ -1,3 +1,7 @@
+7.0.0:
+    - Reworked loggers to use handlers.
+    - Removed deprecated logging functions.
+
 6.0.8:
     - %p can now handle NULL pointers.
 

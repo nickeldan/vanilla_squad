@@ -14,7 +14,7 @@ $(TEST_DEPS_FILE): $(TEST_SOURCE_FILES) $(VASQ_HEADER_FILES)
 	@rm -f $@
 	for file in $(TEST_SOURCE_FILES); do \
 	    echo "$(TEST_DIR)/`$(CC) $(VASQ_INCLUDE_FLAGS) -MM $$file`" >> $@ && \
-	    echo '\t$$(CC) $$(CFLAGS) -DVASQ_TEST_ASSERT -DDEBUG $(VASQ_INCLUDE_FLAGS) -c $$< -o $$@' >> $@; \
+	    echo '\t$$(CC) $$(CFLAGS) $(VASQ_INCLUDE_FLAGS) -c $$< -o $$@' >> $@; \
 	done
 include $(TEST_DEPS_FILE)
 

@@ -50,7 +50,7 @@ The % tokens recognized by these functions are
 - `%llX`
 - `%p`
 - `%s`
-- `%.*`s
+- `%.*s`
 - `%n`
 
 In addition, zero-padding and minimum-length specification can be added to any integer type.  E.g.,
@@ -234,7 +234,7 @@ Outputs:
         0000	54 68 69 73 20 69 73 20 61 20 62 6f 72 69 6e 67 	This is a boring
         0010	20 73 65 6e 74 65 6e 63 65 20 74 68 61 74 20 6e 	 sentence that n
         0020	6f 20 6f 6e 65 20 63 61 72 65 73 20 61 62 6f 75 	o one cares abou
-        0030	74 2e 00                                            t..
+        0030	74 2e 00                                        	t..
 */
 ```
 

@@ -17,12 +17,10 @@
 #endif
 
 struct vasqLogger {
-    vasqHandler handler;
     const char *format;
-    vasqDataProcessor *processor;
-    void *user;
+    vasqHandler handler;
+    vasqLoggerOptions options;
     vasqLogLevel level;
-    unsigned int hex_dump_info : 1;
 };
 
 static bool
@@ -177,8 +175,8 @@ print_file_name:
             case 'l': vasqIncSnprintf(dst, remaining, "%u", line_no); break;
 
             case 'x':
-                if (logger->processor) {
-                    logger->processor(logger->user, position, level, dst, remaining);
+                if (logger->options.processor) {
+                    logger->options.processor(logger->options.user, position, level, dst, remaining);
                 }
                 position++;
                 break;
@@ -302,11 +300,9 @@ vasqLoggerCreate(vasqLogLevel level, const char *format, const vasqHandler *hand
         goto error;
     }
 
-    memcpy(&logger->handler, handler, sizeof(*handler));
     logger->format = format;
-    logger->processor = options->processor;
-    logger->user = options->user;
-    logger->hex_dump_info = !!(options->flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO);
+    memcpy(&logger->handler, handler, sizeof(*handler));
+    memcpy(&logger->options, options, sizeof(*options));
     logger->level = level;
 
     return logger;
@@ -422,7 +418,7 @@ vasqHexDump(vasqLogger *logger, const char *file_name, const char *function_name
     if (!logger) {
         return;
     }
-    dump_level = logger->hex_dump_info ? VASQ_LL_INFO : VASQ_LL_DEBUG;
+    dump_level = (logger->options.flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO) ? VASQ_LL_INFO : VASQ_LL_DEBUG;
     if (logger->level < dump_level) {
         return;
     }

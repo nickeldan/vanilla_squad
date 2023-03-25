@@ -9,6 +9,12 @@
 #include <time.h>
 #include <unistd.h>
 
+#ifndef DEBUG
+#define DEBUG
+#endif
+
+#define VASQ_TEST_ASSERT
+
 #include <scrutiny/scrutiny.h>
 #include <vasq/logger.h>
 #include <vasq/safe_snprintf.h>

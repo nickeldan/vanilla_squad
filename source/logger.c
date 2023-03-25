@@ -1,5 +1,6 @@
 #ifndef VASQ_NO_LOGGING
 
+#include <errno.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,12 +18,9 @@
 
 struct vasqLogger {
     const char *format;
-    vasqLoggerDataProcessor processor;
-    void *user;
-    int fd;
-    vasqLogLevel_t level;
-    unsigned int duped : 1;
-    unsigned int hex_dump_info : 1;
+    vasqHandler handler;
+    vasqLoggerOptions options;
+    vasqLogLevel level;
 };
 
 static bool
@@ -74,7 +72,7 @@ safeIsPrint(char c)
 }
 
 static const char *
-logLevelName(vasqLogLevel_t level)
+logLevelName(vasqLogLevel level)
 {
     switch (level) {
     case VASQ_LL_ALWAYS: return "ALWAYS";
@@ -88,7 +86,7 @@ logLevelName(vasqLogLevel_t level)
 }
 
 static unsigned int
-logLevelNamePadding(vasqLogLevel_t level)
+logLevelNamePadding(vasqLogLevel level)
 {
     switch (level) {
     case VASQ_LL_ALWAYS: return 2;
@@ -103,8 +101,8 @@ logLevelNamePadding(vasqLogLevel_t level)
 }
 
 static void
-vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, char **dst,
-             size_t *remaining, const char *format, va_list args)
+vlogToBuffer(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+             unsigned int line_no, char **dst, size_t *remaining, const char *format, va_list args)
 {
     size_t position = 0;
     time_t now;
@@ -121,13 +119,14 @@ vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, 
                 unsigned int padding_length, len;
                 size_t idx;
                 char time_string[30], padding[LOG_LEVEL_NAME_MAX_PADDING + 1];
+                struct timespec epoch;
 
             case 'M': vasqIncVsnprintf(dst, remaining, format, args); break;
 
             case 'p': vasqIncSnprintf(dst, remaining, "%li", (long)getpid()); break;
 
 #ifdef __linux__
-            case 'T': vasqIncSnprintf(dst, remaining, "%li", (long)syscall(__NR_gettid)); break;
+            case 'T': vasqIncSnprintf(dst, remaining, "%li", (long)syscall(SYS_gettid)); break;
 #endif
 
             case 'L': vasqIncSnprintf(dst, remaining, "%s", logLevelName(level)); break;
@@ -139,7 +138,10 @@ vlogToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, 
                 vasqIncSnprintf(dst, remaining, "%s", padding);
                 break;
 
-            case 'u': vasqIncSnprintf(dst, remaining, "%li", (long)now); break;
+            case 'u':
+                clock_gettime(CLOCK_REALTIME, &epoch);
+                vasqIncSnprintf(dst, remaining, "%lli", (long long)epoch.tv_sec);
+                break;
 
             case 't':
                 ctime_r(&now, time_string);
@@ -173,8 +175,8 @@ print_file_name:
             case 'l': vasqIncSnprintf(dst, remaining, "%u", line_no); break;
 
             case 'x':
-                if (logger->processor) {
-                    logger->processor(logger->user, position, level, dst, remaining);
+                if (logger->options.processor) {
+                    logger->options.processor(logger->options.user, position, level, dst, remaining);
                 }
                 position++;
                 break;
@@ -199,8 +201,8 @@ print_file_name:
 }
 
 static void
-logToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, char **dst, size_t *remaining,
-            const char *format, ...)
+logToBuffer(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+            unsigned int line_no, char **dst, size_t *remaining, const char *format, ...)
 {
     va_list args;
 
@@ -209,82 +211,102 @@ logToBuffer(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, c
     va_end(args);
 }
 
-int
-vasqLoggerCreate(int fd, vasqLogLevel_t level, const char *format, const vasqLoggerOptions *options,
-                 vasqLogger **logger)
+static void
+writeToFd(void *user, vasqLogLevel level, const char *text, size_t size)
 {
-    int new_fd, local_errno;
+    int fd = (intptr_t)user;
+
+    (void)level;
+
+    if (write(fd, text, size) < 0) {
+        NO_OP;
+    }
+}
+
+static void
+closeFd(void *user)
+{
+    int fd = (intptr_t)user;
+
+    close(fd);
+}
+
+int
+vasqFdHandlerCreate(int fd, unsigned int flags, vasqHandler *handler)
+{
+    int new_fd;
+
+    if (!handler) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    new_fd = dup(fd);
+    if (new_fd < 0) {
+        return -1;
+    }
+
+    if (flags & VASQ_LOGGER_FLAG_CLOEXEC) {
+        int fd_flags;
+
+        fd_flags = fcntl(new_fd, F_GETFD);
+        if (fd_flags == -1 || fcntl(new_fd, F_SETFD, fd_flags | FD_CLOEXEC) == -1) {
+            int local_errno = errno;
+
+            close(new_fd);
+            errno = local_errno;
+            return -1;
+        }
+    }
+
+    handler->func = writeToFd;
+    handler->cleanup = closeFd;
+    handler->user = (void *)(intptr_t)new_fd;
+
+    return 0;
+}
+
+vasqLogger *
+vasqLoggerCreate(vasqLogLevel level, const char *format, const vasqHandler *handler,
+                 const vasqLoggerOptions *options)
+{
+    int errno_value;
+    vasqLogger *logger;
     const vasqLoggerOptions default_options = {0};
 
     if (!options) {
         options = &default_options;
     }
 
-    if (fd < 0 || !logger) {
-        return VASQ_RET_USAGE;
+    if (!handler || !handler->func) {
+        errno = EINVAL;
+        return NULL;
     }
 
     if (!validLogFormat(format)) {
-        return VASQ_RET_BAD_FORMAT;
+        errno_value = EINVAL;
+        goto error;
     }
 
-    *logger = malloc(sizeof(**logger));
-    if (!*logger) {
-        return VASQ_RET_OUT_OF_MEMORY;
+    logger = malloc(sizeof(*logger));
+    if (!logger) {
+        errno_value = ENOMEM;
+        goto error;
     }
 
-    if (options->flags & VASQ_LOGGER_FLAG_DUP) {
-        while (true) {
-            new_fd = dup(fd);
-            if (new_fd == -1) {
-                local_errno = errno;
+    logger->format = format;
+    memcpy(&logger->handler, handler, sizeof(*handler));
+    memcpy(&logger->options, options, sizeof(*options));
+    logger->level = level;
 
-                switch (local_errno) {
-#ifdef EBUSY
-                case EBUSY:
-#endif
-                case EINTR: continue;
+    return logger;
 
-                default:
-                    free(*logger);
-                    *logger = NULL;
-                    errno = local_errno;
-                    return VASQ_RET_DUP_FAIL;
-                }
-            }
-            else {
-                break;
-            }
-        }
-
-        (*logger)->duped = true;
+error:
+    if (handler->cleanup) {
+        handler->cleanup(handler->user);
     }
-    else {
-        new_fd = fd;
-        (*logger)->duped = false;
-    }
-
-    (*logger)->fd = new_fd;
-    (*logger)->format = format;
-    (*logger)->processor = options->processor;
-    (*logger)->user = options->user;
-    (*logger)->hex_dump_info = !!(options->flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO);
-    (*logger)->level = level;
-
-    if (options->flags & VASQ_LOGGER_FLAG_CLOEXEC) {
-        int flags;
-
-        flags = fcntl(new_fd, F_GETFD);
-        if (flags == -1 || fcntl(new_fd, F_SETFD, flags | FD_CLOEXEC) == -1) {
-            local_errno = errno;
-            vasqLoggerFree(*logger);
-            *logger = NULL;
-            errno = local_errno;
-            return VASQ_RET_FCNTL_FAIL;
-        }
-    }
-
-    return VASQ_RET_OK;
+    errno = errno_value;
+    return NULL;
 }
 
 void
@@ -294,39 +316,20 @@ vasqLoggerFree(vasqLogger *logger)
         return;
     }
 
-    if (logger->duped) {
-        close(logger->fd);
+    if (logger->handler.cleanup) {
+        logger->handler.cleanup(logger->handler.user);
     }
-
     free(logger);
 }
 
-int
-vasqLoggerFd(const vasqLogger *logger)
-{
-    return logger ? logger->fd : -1;
-}
-
-bool
-vasqSetLoggerFormat(vasqLogger *logger, const char *format)
-{
-    if (logger && validLogFormat(format)) {
-        logger->format = format;
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-vasqLogLevel_t
-vasqLoggerLevel(const vasqLogger *logger)
+vasqLogLevel
+vasqLoggerLevel(vasqLogger *logger)
 {
     return logger ? logger->level : VASQ_LL_NONE;
 }
 
 void
-vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level)
+vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel level)
 {
     if (logger) {
         logger->level = level;
@@ -334,33 +337,8 @@ vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel_t level)
 }
 
 void
-vasqSetLoggerProcessor(vasqLogger *logger, vasqLoggerDataProcessor processor)
-{
-    if (!logger) {
-        return;
-    }
-
-    logger->processor = processor;
-}
-
-void *
-vasqLoggerUserData(const vasqLogger *logger)
-{
-    return logger ? logger->user : NULL;
-}
-
-void
-vasqSetLoggerUserData(vasqLogger *logger, void *user)
-{
-    if (!logger) {
-        return;
-    }
-
-    logger->user = user;
-}
-
-void
-vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format, ...)
+vasqLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                 unsigned int line_no, const char *format, ...)
 {
     va_list args;
 
@@ -370,8 +348,8 @@ vasqLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DE
 }
 
 void
-vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_DECL, const char *format,
-                  va_list args)
+vasqVLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
+                  unsigned int line_no, const char *format, va_list args)
 {
     char output[VASQ_LOGGING_LENGTH];
     char *dst = output;
@@ -383,18 +361,13 @@ vasqVLogStatement(const vasqLogger *logger, vasqLogLevel_t level, VASQ_CONTEXT_D
     }
 
     remote_errno = errno;
-
     vlogToBuffer(logger, level, file_name, function_name, line_no, &dst, &remaining, format, args);
-
-    if (write(logger->fd, output, dst - output) < 0) {
-        NO_OP;
-    }
-
+    logger->handler.func(logger->handler.user, level, output, dst - output);
     errno = remote_errno;
 }
 
 void
-vasqRawLog(const vasqLogger *logger, const char *format, ...)
+vasqRawLog(vasqLogger *logger, const char *format, ...)
 {
     va_list args;
 
@@ -404,7 +377,7 @@ vasqRawLog(const vasqLogger *logger, const char *format, ...)
 }
 
 void
-vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
+vasqVRawLog(vasqLogger *logger, const char *format, va_list args)
 {
     int remote_errno;
     ssize_t written;
@@ -415,18 +388,14 @@ vasqVRawLog(const vasqLogger *logger, const char *format, va_list args)
     }
 
     remote_errno = errno;
-
     written = vasqSafeVsnprintf(output, sizeof(output), format, args);
-
-    if (written > 0 && write(logger->fd, output, written) < 0) {
-        NO_OP;
-    }
-
+    logger->handler.func(logger->handler.user, VASQ_LL_NONE, output, written);
     errno = remote_errno;
 }
 
 void
-vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const void *data, size_t size)
+vasqHexDump(vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
+            const char *name, const void *data, size_t size)
 {
 #define NUM_HEXDUMP_LINES   (VASQ_HEXDUMP_SIZE / VASQ_HEXDUMP_WIDTH)
 #define HEXDUMP_LINE_LENGTH (VASQ_HEXDUMP_WIDTH * 4 + 10)
@@ -438,12 +407,12 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
     int remote_errno;
     unsigned int actual_dump_size;
     size_t remaining = sizeof(output);
-    vasqLogLevel_t dump_level;
+    vasqLogLevel dump_level;
 
     if (!logger) {
         return;
     }
-    dump_level = logger->hex_dump_info ? VASQ_LL_INFO : VASQ_LL_DEBUG;
+    dump_level = (logger->options.flags & VASQ_LOGGER_FLAG_HEX_DUMP_INFO) ? VASQ_LL_INFO : VASQ_LL_DEBUG;
     if (logger->level < dump_level) {
         return;
     }
@@ -482,85 +451,12 @@ vasqHexDump(const vasqLogger *logger, VASQ_CONTEXT_DECL, const char *name, const
                         (size - actual_dump_size == 1) ? "" : "s");
     }
 
-    if (write(logger->fd, output, dst - output) < 0) {
-        NO_OP;
-    }
-
+    logger->handler.func(logger->handler.user, dump_level, output, dst - output);
     errno = remote_errno;
 
 #undef NUM_HEXDUMP_LINES
 #undef HEXDUMP_LINE_LENGTH
 #undef HEXDUMP_BUFFER_SIZE
-}
-
-void *
-vasqMalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t size)
-{
-    void *ptr;
-
-    ptr = malloc(size);
-    if (!ptr && size > 0) {
-        vasqLogStatement(logger, VASQ_LL_ERROR, file_name, function_name, line_no,
-                         "Failed to allocate %zu bytes", size);
-    }
-    return ptr;
-}
-
-void *
-vasqCalloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, size_t nmemb, size_t size)
-{
-    void *ptr;
-
-    ptr = calloc(nmemb, size);
-    if (!ptr && nmemb * size > 0) {
-        vasqLogStatement(logger, VASQ_LL_ERROR, file_name, function_name, line_no,
-                         "Failed to allocate %zu bytes", nmemb * size);
-    }
-    return ptr;
-}
-
-void *
-vasqRealloc(const vasqLogger *logger, VASQ_CONTEXT_DECL, void *ptr, size_t size)
-{
-    void *success;
-
-    success = realloc(ptr, size);
-    if (!success && size > 0) {
-        vasqLogStatement(logger, VASQ_LL_ERROR, file_name, function_name, line_no,
-                         "Failed to reallocate %zu bytes", size);
-    }
-    return success;
-}
-
-pid_t
-vasqFork(const vasqLogger *logger, VASQ_CONTEXT_DECL)
-{
-    pid_t child;
-
-    switch ((child = fork())) {
-    case -1:
-        vasqLogStatement(logger, VASQ_LL_ERROR, file_name, function_name, line_no, "fork: %s",
-                         strerror(errno));
-        break;
-
-    case 0: break;
-
-    default:
-        vasqLogStatement(logger, VASQ_LL_PROCESS, file_name, function_name, line_no,
-                         "Child process started (PID = %li)", (long)child);
-        break;
-    }
-
-    return child;
-}
-
-void
-vasqExit(vasqLogger *logger, VASQ_CONTEXT_DECL, int value, bool quick)
-{
-    vasqLogStatement(logger, VASQ_LL_PROCESS, file_name, function_name, line_no,
-                     "Process exiting with value %i", value);
-    vasqLoggerFree(logger);
-    (quick ? _exit : exit)(value);
 }
 
 #endif  // VASQ_NO_LOGGING

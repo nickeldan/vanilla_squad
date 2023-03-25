@@ -1,4 +1,4 @@
-name: check-format
+name: Check format
 
 on:
   push:
@@ -16,8 +16,3 @@ jobs:
       - uses: jidicula/clang-format-action@v4.6.2
         with:
           clang-format-version: '14'
-      - uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
-      - run: pip install black
-      - run: black --check -l 110 tests

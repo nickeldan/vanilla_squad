@@ -79,8 +79,6 @@ main()
 {
     scrGroup *group;
 
-    scrInit();
-
     group = scrGroupCreate(NULL, NULL);
     APPLY_MACRO(ADD_TEST)
 

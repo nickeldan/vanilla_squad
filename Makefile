@@ -28,19 +28,19 @@ format:
 	find . -name '*.[hc]' -print0 | xargs -0 -n 1 clang-format -i
 
 install: /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY)) $(foreach file,$(VASQ_HEADER_FILES),/usr/local/include/vasq/$(notdir $(file)))
+	ldconfig
 
 /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY)): $(VASQ_SHARED_LIBRARY)
 	cp $< $@
 
-/usr/local/include/vasq/%.h: $(VASQ_INCLUDE_DIR)/vasq/%.h /usr/local/include/vasq
+/usr/local/include/vasq/%.h: include/vasq/%.h
+	@mkdir -p $(@D)
 	cp $< $@
-
-/usr/local/include/vasq:
-	mkdir -p $@
 
 uninstall:
 	rm -rf /usr/local/include/vasq
 	rm -f /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY))
+	ldconfig
 
 clean: $(CLEAN_TARGETS)
 	@rm -f $(DEPS_FILES)

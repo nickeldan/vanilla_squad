@@ -286,12 +286,12 @@ test_logger_epoch(void)
     struct test_ctx ctx;
     vasqLogger *logger;
 
-    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_DEBUG, "%u", NULL), NULL);
-    VASQ_INFO(logger, "Check");
     if (clock_gettime(CLOCK_REALTIME, &now) != 0) {
         SCR_FAIL("clock_gettime: %s", strerror(errno));
     }
 
+    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_DEBUG, "%u", NULL), NULL);
+    VASQ_INFO(logger, "Check");
     epoch = strtoll(ctx.buffer, &endptr, 10);
     if (ctx.buffer[0] == '\0' || *endptr != '\0') {
         SCR_FAIL("Invalid logged time: %s", ctx.buffer);

@@ -278,6 +278,35 @@ test_logger_level_with_padding(void)
 }
 
 void
+test_logger_name(void)
+{
+    struct test_ctx ctx;
+    vasqLoggerOptions options = {.name = "Name"};
+    vasqLogger *logger;
+
+    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_INFO, "%N", &options), NULL);
+
+    VASQ_INFO(logger, "Check");
+    SCR_ASSERT_STR_EQ(ctx.buffer, "Name");
+
+    vasqLoggerFree(logger);
+}
+
+void
+test_logger_no_name(void)
+{
+    struct test_ctx ctx;
+    vasqLogger *logger;
+
+    SCR_ASSERT_PTR_NEQ(logger = create_logger(&ctx, VASQ_LL_INFO, "%N", NULL), NULL);
+
+    VASQ_INFO(logger, "Check");
+    SCR_ASSERT_STR_EQ(ctx.buffer, "");
+
+    vasqLoggerFree(logger);
+}
+
+void
 test_logger_epoch(void)
 {
     long long epoch;

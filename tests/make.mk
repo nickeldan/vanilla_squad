@@ -10,7 +10,6 @@ BUILD_DEPS ?= $(if $(MAKECMDGOALS),$(subst clean,,$(MAKECMDGOALS)),yes)
 ifneq ($(BUILD_DEPS),)
 
 $(TEST_DEPS_FILE): $(TEST_SOURCE_FILES) $(VASQ_HEADER_FILES)
-	@mkdir -p $(@D)
 	@rm -f $@
 	for file in $(TEST_SOURCE_FILES); do \
 	    echo "$(TEST_DIR)/`$(CC) $(VASQ_INCLUDE_FLAGS) -MM $$file`" >> $@ && \
@@ -29,5 +28,7 @@ tests: $(TEST_BINARY)
 
 tests_clean:
 	@rm -f $(TEST_BINARY) $(TEST_OBJECT_FILES)
+
+.PHONY: tests_clean
 
 CLEAN_TARGETS += tests_clean

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['vasqloggerhandler_47',['vasqLoggerHandler',['../structvasqLoggerHandler.html',1,'']]],
-  ['vasqloggeroptions_48',['vasqLoggerOptions',['../structvasqLoggerOptions.html',1,'']]]
+  ['vasqloggerhandler_0',['vasqLoggerHandler',['../structvasqLoggerHandler.html',1,'']]],
+  ['vasqloggeroptions_1',['vasqLoggerOptions',['../structvasqLoggerOptions.html',1,'']]]
 ];

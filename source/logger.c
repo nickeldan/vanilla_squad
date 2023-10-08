@@ -18,6 +18,7 @@
 
 struct vasqLogger {
     const char *format;
+    char *name;
     vasqHandler handler;
     vasqLoggerOptions options;
     vasqLogLevel level;
@@ -46,6 +47,7 @@ validLogFormat(const char *format)
 #endif
             case 'L':
             case '_':
+            case 'N':
             case 'u':
             case 't':
             case 'h':
@@ -136,6 +138,12 @@ vlogToBuffer(vasqLogger *logger, vasqLogLevel level, const char *file_name, cons
                 memset(padding, ' ', padding_length);
                 padding[padding_length] = '\0';
                 vasqIncSnprintf(dst, remaining, "%s", padding);
+                break;
+
+            case 'N':
+                if (logger->options.name) {
+                    vasqIncSnprintf(dst, remaining, "%s", logger->options.name);
+                }
                 break;
 
             case 'u':
@@ -299,6 +307,15 @@ vasqLoggerCreate(vasqLogLevel level, const char *format, const vasqHandler *hand
     memcpy(&logger->options, options, sizeof(*options));
     logger->level = level;
 
+    if (options->name) {
+        logger->options.name = strdup(options->name);
+        if (!logger->options.name) {
+            free(logger);
+            errno_value = ENOMEM;
+            goto error;
+        }
+    }
+
     return logger;
 
 error:
@@ -319,6 +336,9 @@ vasqLoggerFree(vasqLogger *logger)
     if (logger->handler.cleanup) {
         logger->handler.cleanup(logger->handler.user);
     }
+
+    free(logger->options.name);
+
     free(logger);
 }
 
@@ -334,6 +354,12 @@ vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel level)
     if (logger) {
         logger->level = level;
     }
+}
+
+const char *
+vasqLoggerName(vasqLogger *logger)
+{
+    return logger ? logger->options.name : NULL;
 }
 
 void

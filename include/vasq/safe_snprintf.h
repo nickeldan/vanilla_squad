@@ -3,8 +3,7 @@
  * @author Daniel Walker
  * @brief Provides the safe_snprintf family of functions.
  */
-#ifndef VANILLA_SQUAD_SAFE_SNPRINTF_H
-#define VANILLA_SQUAD_SAFE_SNPRINTF_H
+#pragma once
 
 #include <stdarg.h>
 #include <sys/types.h>
@@ -56,5 +55,3 @@ vasqIncSnprintf(char **output, size_t *capacity, const char *format, ...) VASQ_F
  */
 ssize_t
 vasqIncVsnprintf(char **output, size_t *capacity, const char *format, va_list args) VASQ_NONNULL(3);
-
-#endif  // VANILLA_SQUAD_SAFE_SNPRINTF_H

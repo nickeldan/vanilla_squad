@@ -72,14 +72,14 @@
     M(logger_fd_handler_cloexec)
 
 #define DECL_TEST(func) void test_##func(void);
-#define ADD_TEST(func)  scrGroupAddTest(group, #func, test_##func, 0, 0);
+#define ADD_TEST(func)  scrGroupAddTest(group, #func, test_##func, NULL);
 
 APPLY_MACRO(DECL_TEST)
 
 int
 main()
 {
-    scrGroup *group;
+    scrGroup group;
 
     group = scrGroupCreate(NULL, NULL);
     APPLY_MACRO(ADD_TEST)

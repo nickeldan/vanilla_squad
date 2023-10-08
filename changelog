@@ -1,5 +1,6 @@
 7.1.0:
     - Added names to loggers.
+    - Now using Scrutiny 0.7.1.
 
 7.0.0:
     - Reworked loggers to use handlers.

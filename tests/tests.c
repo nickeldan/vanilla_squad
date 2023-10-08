@@ -48,6 +48,8 @@
     M(logger_tid)                  \
     M(logger_level)                \
     M(logger_level_with_padding)   \
+    M(logger_name)                 \
+    M(logger_no_name)              \
     M(logger_epoch)                \
     M(logger_pretty_timestamp)     \
     M(logger_hour)                 \

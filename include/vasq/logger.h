@@ -3,8 +3,7 @@
  * @author Daniel Walker
  * @brief Provides the logger interface.
  */
-#ifndef VANILLA_SQUAD_LOGGER_H
-#define VANILLA_SQUAD_LOGGER_H
+#pragma once
 
 #include <errno.h>
 #include <stdarg.h>
@@ -39,9 +38,10 @@ typedef struct vasqLogger vasqLogger;
 
     %M : Message string
     %p : PID
-    %T : Thread ID
+    %T : Thread ID (Linux only)
     %L : Log level
     %_ : Log level name padding
+    %N : Logger name
     %u : Unix epoch time in seconds
     %t : "Pretty" timestamp
     %h : Hour
@@ -99,11 +99,11 @@ vasqFdHandlerCreate(int fd, unsigned int flags, vasqHandler *handler);
 /**
  * @brief Function type for processing the %x logger format token.
  *
- * @param user User-provided data.
- * @param idx A 0-up counter of which %x in the format string is being processed.
- * @param level The level of the message.
- * @param dst A pointer to the destination pointer as used in vasqIncSnprintf (see safe_snprintf.h).
- * @param remaining A pointer to the remaining number of characters in the destination buffer as used in
+ * @param user          User-provided data.
+ * @param idx           A 0-up counter of which %x in the format string is being processed.
+ * @param level         The level of the message.
+ * @param dst           A pointer to the destination pointer as used in vasqIncSnprintf (see safe_snprintf.h).
+ * @param remaining     A pointer to the remaining number of characters in the destination buffer as used in
  * vasqIncSnprintf (see safe_snprintf.h).
  */
 typedef void
@@ -115,6 +115,7 @@ vasqDataProcessor(void *user, size_t idx, vasqLogLevel level, char **dst, size_t
  * @note Currently, the only available flag is VASQ_LOGGER_FLAG_HEX_DUMP_INFO.
  */
 typedef struct vasqLoggerOptions {
+    char *name;                   /**< The logger's name.  If set, will be strdup'ed. */
     vasqDataProcessor *processor; /**< The processor to be used for %x format tokens. */
     void *user;                   /**< User-provided data. */
     unsigned int flags;           /**< Bitwise-or-combined flags. */
@@ -144,7 +145,7 @@ vasqLoggerCreate(vasqLogLevel level, const char *format, const vasqHandler *hand
  *
  * If the VASQ_LOGGER_FLAG_DUP flag was used to create the logger, then the file descriptor will be closed.
  *
- * @param logger The logger handle to be freed.  This function does nothing if logger is NULL.
+ * @param logger    The logger handle to be freed.  This function does nothing if logger is NULL.
  */
 void
 vasqLoggerFree(vasqLogger *logger);
@@ -152,9 +153,9 @@ vasqLoggerFree(vasqLogger *logger);
 /**
  * @brief Return a logger's maximum log level.
  *
- * @param logger The logger handle.
+ * @param logger    The logger handle.
  *
- * @return The maximum log level if logger is not NULL and VASQ_LL_NONE otherwise.
+ * @return          The maximum log level if logger is not NULL and VASQ_LL_NONE otherwise.
  */
 vasqLogLevel
 vasqLoggerLevel(vasqLogger *logger);
@@ -162,23 +163,33 @@ vasqLoggerLevel(vasqLogger *logger);
 /**
  * @brief Set the maximum log level for a logger.
  *
- * @param logger The logger handle.
- * @param level The new maximum log level.
+ * @param logger    The logger handle.
+ * @param level     The new maximum log level.
  */
 void
 vasqSetLoggerLevel(vasqLogger *logger, vasqLogLevel level);
+
+/**
+ * @brief Return the logger's name.
+ *
+ * @param logger    The logger handle.
+ *
+ * @return          The logger's name or NULL is none has been set.
+ */
+const char *
+vasqLoggerName(vasqLogger *logger);
 
 /**
  * @brief Emit a logging message.
  *
  * This function has no effect if either logger is NULL or the logger's maximum log level is VASQ_LL_NONE.
  *
- * @param logger The logger handle.
- * @param level The level of the message.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
+ * @param logger            The logger handle.
+ * @param level             The level of the message.
+ * @param file_name         The name of the file where the message originated.
+ * @param function_name     The name of the function where the message originated.
+ * @param line_no           The line number where the message originated.
+ * @param format            A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
  */
 void
 vasqLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, const char *function_name,
@@ -223,34 +234,28 @@ vasqLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name, 
 /**
  * @brief Logging equivalent of the perror function at the CRITICAL level.
  *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
+ * @param logger    The logger handle.
+ * @param msg       The argument that would normally be passed to perror.
+ * @param errnum    The errno value.
  */
-#define VASQ_PCRITICAL(logger, msg, errnum) VASQ_CRITICAL(logger, msg ": %s", strerror(errnum))
+#define VASQ_PCRITICAL(logger, msg, errnum) VASQ_CRITICAL(logger, "%s: %s", msg, strerror(errnum))
 /**
  * @brief Logging equivalent of the perror function at the ERROR level.
  *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
+ * @param logger    The logger handle.
+ * @param msg       The argument that would normally be passed to perror.
+ * @param errnum    The errno value.
  */
-#define VASQ_PERROR(logger, msg, errnum) VASQ_ERROR(logger, msg ": %s", strerror(errnum))
+#define VASQ_PERROR(logger, msg, errnum) VASQ_ERROR(logger, "%s: %s", msg, strerror(errnum))
 
 /**
  * @brief Logging equivalent of the perror function at the WARNING level.
  *
- * @param logger The logger handle.
- * @param msg The argument that would normally be passed to perror.
- * @param errnum The errno value.
- *
- * @warning msg must be a string literal and not a variable.
+ * @param logger    The logger handle.
+ * @param msg       The argument that would normally be passed to perror.
+ * @param errnum    The errno value.
  */
-#define VASQ_PWARNING(logger, msg, errnum) VASQ_WARNING(logger, msg ": %s", strerror(errnum))
+#define VASQ_PWARNING(logger, msg, errnum) VASQ_WARNING(logger, "%s: %s", msg, strerror(errnum))
 
 /**
  * @brief Same as vasqLogStatement but takes a va_list instead of variable arguments.
@@ -262,8 +267,8 @@ vasqVLogStatement(vasqLogger *logger, vasqLogLevel level, const char *file_name,
 /**
  * @brief Write directly to a logger's descriptor.
  *
- * @param logger The logger handle.
- * @param format A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
+ * @param logger    The logger handle.
+ * @param format    A format string (corresponding to vasqSafeSnprintf's syntax) for the the message.
  */
 void
 vasqRawLog(vasqLogger *logger, const char *format, ...) VASQ_FORMAT(2);
@@ -277,13 +282,13 @@ vasqVRawLog(vasqLogger *logger, const char *format, va_list args) VASQ_NONNULL(2
 /**
  * @brief Display a hex dump of a section of memory.  The dump appears at the DEBUG level.
  *
- * @param logger The logger handle.
- * @param file_name The name of the file where the message originated.
- * @param function_name The name of the function where the message originated.
- * @param line_no The line number where the message originated.
- * @param name A description of the data.
- * @param data A pointer to the data.
- * @param size The number of bytes to display.
+ * @param logger            The logger handle.
+ * @param file_name         The name of the file where the message originated.
+ * @param function_name     The name of the function where the message originated.
+ * @param line_no           The line number where the message originated.
+ * @param name              A description of the data.
+ * @param data              A pointer to the data.
+ * @param size              The number of bytes to display.
  */
 void
 vasqHexDump(vasqLogger *logger, const char *file_name, const char *function_name, unsigned int line_no,
@@ -348,5 +353,3 @@ extern bool _vasq_abort_caught;
 #define VASQ_ASSERT(...)       NO_OP
 
 #endif  // VASQ_NO_LOGGING
-
-#endif  // VANILLA_SQUAD_LOGGER_H

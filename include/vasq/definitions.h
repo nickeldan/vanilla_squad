@@ -1,7 +1,6 @@
-#ifndef VANILLA_SQUAD_DEFINITIONS_H
-#define VANILLA_SQUAD_DEFINITIONS_H
+#pragma once
 
-#define VASQ_VERSION "7.0.0"
+#define VASQ_VERSION "7.1.0"
 
 #ifndef NO_OP
 #define NO_OP ((void)0)
@@ -32,5 +31,3 @@
 #define VASQ_MALLOC
 
 #endif
-
-#endif  // VANILLA_SQUAD_DEFINITIONS_H

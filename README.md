@@ -141,6 +141,7 @@ typedef void
 vasqDataProcessor(void *user, size_t idx, vasqLogLevel level, char **dst, size_t *remaining);
 
 typedef struct vasqLoggerOptions {
+    char *name;                         // The logger's name.  If set, will be strdup'ed.
     vasqLoggerDataProcessor *processor; // The processor to be used for %x format tokens.
     void *user;                         // A pointer to user data to be passed to the processor.
     unsigned int flags;                 // Bitwise-or-combined flags.
@@ -162,6 +163,7 @@ The format string looks like a `printf` string and accepts the following % token
 - `%T`: Thread ID.  Only available if compiling for Linux.
 - `%L`: Log level.
 - `%_`: Space padding that can be used with `%L`.  See below for an example of its usage.
+- '%N': Logger name.
 - `%u`: Unix epoch time in seconds.
 - `%t`: Pretty timestamp.  E.g., Sun Feb 14 14:27:19 2021
 - `%h`: Hour as an integer.

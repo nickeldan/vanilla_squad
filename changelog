@@ -1,3 +1,6 @@
+7.1.0:
+    - Added names to loggers.
+
 7.0.0:
     - Reworked loggers to use handlers.
     - Removed deprecated logging functions.

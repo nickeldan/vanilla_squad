@@ -25,7 +25,7 @@ include $(TEST_DIR)/make.mk
 _all: $(VASQ_SHARED_LIBRARY) $(VASQ_STATIC_LIBRARY)
 
 format:
-	find . -name '*.[hc]' -print0 | xargs -0 -n 1 clang-format -i
+	@find . -name '*.[hc]' -print0 | xargs -0 -n 1 clang-format -i
 
 install: /usr/local/lib/$(notdir $(VASQ_SHARED_LIBRARY)) $(foreach file,$(VASQ_HEADER_FILES),/usr/local/include/vasq/$(notdir $(file)))
 	ldconfig

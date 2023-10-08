@@ -1,5 +1,4 @@
-#ifndef VANILLA_SQUAD_CONFIG_H
-#define VANILLA_SQUAD_CONFIG_H
+#pragma once
 
 // Causes all logging logic to be removed during preprocessing.
 // #define VASQ_NO_LOGGING
@@ -27,5 +26,3 @@
 // If other macros are defined such that PLACEHOLDER() would normally resolve to a no op, this macro causes
 // the PLACEHOLDER() macro to generate a warning when used.
 // #define VASQ_WARN_PLACEHOLDER
-
-#endif  // VANILLA_SQUAD_CONFIG_H

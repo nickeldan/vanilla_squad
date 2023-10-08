@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container:
-      image: nickeldan/scrutiny:0.5.2
+      image: nickeldan/scrutiny:0.7.1
     steps:
       - uses: actions/checkout@v3
       - run: make tests

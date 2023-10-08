@@ -309,7 +309,7 @@ Configuration
 Testing
 =======
 
-Testing can be performed through the [Scrutiny framework](https://github.com/nickeldan/scrutiny).  After installing at least version 0.5.0 of the framework, you can run tests by
+Testing can be performed through the [Scrutiny framework](https://github.com/nickeldan/scrutiny).  After installing at least version 0.7.1 of the framework, you can run tests by
 
 ```sh
 make tests
